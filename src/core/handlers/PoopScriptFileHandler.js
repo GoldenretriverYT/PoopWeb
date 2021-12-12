@@ -39,7 +39,7 @@ class PoopScriptFileHandler {
                     stopExec = true;
                     return;
                 } else {
-                    res.status(500).send("<h1>Internal server error</h1>Powered by PoopWeb WebServer v1.0");
+                    res.status(500).send(GenericUtils.generateErrorPage("Internal server error", "The PoopScript execution did error out."));
                     Logger.error(req.path + ": " + args.join(" "));
                     
                     stopExec = true;
@@ -99,16 +99,23 @@ class PoopScriptFileHandler {
                     env.exec(poopScriptLines.join("\n"));
                 } catch(err) {
                     if(Config.config.poopscriptSettings.errorHandling == "print_error") {
+                        console.log("Oops! PoopScript crashed!");
                         console.log(err);
 
                         res.status(500).send("[ERROR] PoopScript errored out: " + err);
-                        Logger.error(req.path + ": " + err);
+
+                        Logger.error(req.path + ": PoopScript crashed.");
+                        Logger.error(err.message + " | StackTrace: " + err.stack);
                         
                         stopExec = true;
                         return;
                     } else {
-                        res.status(500).send("<h1>Internal server error</h1>Powered by PoopWeb WebServer v1.0");
-                        Logger.error(req.path + ": " + err);
+                        console.log("Oops! PoopScript crashed!");
+                        console.log(err);
+
+                        res.status(500).send(GenericUtils.generateErrorPage("Internal server error", "PoopScript crashed. Check server logs for more information."));
+                        Logger.error(req.path + ": PoopScript crashed.");
+                        Logger.error(err.message + " | StackTrace: " + err.stack);
                         
                         stopExec = true;
                         return;

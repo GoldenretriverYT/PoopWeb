@@ -4,6 +4,7 @@ const PathUtils = require("./PathUtils");
 class Config {
     static initiliazed = false;
     static dirname = "";
+    static version = "v0.2.0";
 
     static config = {
         "portHttp": 80,

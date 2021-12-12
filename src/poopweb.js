@@ -4,10 +4,7 @@ const Config = require("./utils/Config");
 const Logger = require("./utils/Logger");
 const WebServer = require("./core/WebServer");
 
-const PRODUCT_NAME = "PoopWeb";
-const VERSION = "0.2.0";
-
-console.log(`Welcome to ${PRODUCT_NAME} v${VERSION}`);
+console.log(`Welcome to PoopWeb ${Config.version}`);
 
 Config.dirname = __dirname;
 

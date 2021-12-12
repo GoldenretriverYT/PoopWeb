@@ -6,7 +6,8 @@ const DefaultFileHandler = require("./handlers/DefaultFileHandler");
 const PoopScriptFileHandler = require("./handlers/PoopScriptFileHandler");
 const Config = require("../utils/Config");
 const Logger = require("../utils/Logger");
-const PathUtils = require("../utils/PathUtils")
+const PathUtils = require("../utils/PathUtils");
+const GenericUtils = require("../utils/GenericUtils");
 
 class WebServer {
     static init() {
@@ -27,14 +28,20 @@ class WebServer {
 
             var modifiedUrl = urlParsed.pathname;
 
-            if(!fs.existsSync(PathUtils.preparePath(Config.config.hostDirectory + modifiedUrl))) {
-                res.status(404).send("<h1>Not found</h1>The requested resource is not available<br>Powered by PoopWeb WebServer v1.0");
+            if(!fs.existsSync(PathUtils.preparePath(Config.config.hostDirectory + modifiedUrl))) { // Check if path even exists
+                res.status(404).send(GenericUtils.generateErrorPage("Resource not found", "The requested resource was not found on the server."));
                 Logger.error(modifiedUrl + ": 404");
                 return;
             }
 
             if(fs.lstatSync(PathUtils.preparePath(Config.config.hostDirectory + modifiedUrl)).isDirectory()) {
                 modifiedUrl += "index.pw";
+
+                if(!fs.existsSync(PathUtils.preparePath(Config.config.hostDirectory + modifiedUrl))) { // Check again if index.pw exists.
+                    res.status(404).send(GenericUtils.generateErrorPage("No index.pw", "The requested resource is a directory, but does not include a index.pw file."));
+                    Logger.error(modifiedUrl + ": 404");
+                    return;
+                }
             }
             
             var extFound = false;
@@ -51,7 +58,7 @@ class WebServer {
                         extFound = true;
                     }
                 }else {
-                    res.status(500).send("<h1>Internal server error</h1>Invalid extension handler defined in config, check logs for more information<br>Powered by PoopWeb WebServer v1.0");
+                    res.status(500).send(GenericUtils.generateErrorPage("Internal server error", "Invalid extension handler defined in config, check logs for more information"));
                     Logger.error(modifiedUrl + ": Invalid extension handler defined for " + ext);
                     return;
                 }
@@ -60,7 +67,7 @@ class WebServer {
             if(extFound) return;
             
             if(!("default" in Config.config.extensionHandlers)) {
-                res.status(500).send("<h1>Internal server error</h1>No file handler for this file extension is defined and there is no default file handler<br>Powered by PoopWeb WebServer v1.0");
+                res.status(500).send(GenericUtils.generateErrorPage("Internal server error", "No file handler for this file extension is defined and there is no default file handler"));
                 Logger.error(modifiedUrl + ": No file handler for this file extension is defined and there is no default file handler");
                 return;
             }
