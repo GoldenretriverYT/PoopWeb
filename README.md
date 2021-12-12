@@ -6,7 +6,7 @@ To find out how to use PoopWeb, please look at the documentation.
 
 [Click here to view the PoopScript documentation](https://goldenretriveryt.github.io/PoopScript/)
 
-[Click here to view the PoopWeb documentation](https://goldenretriveryt.github.io/PoopWeb/)
+[Click here to view the PoopWeb documentation](https://goldenretriveryt.github.io/PoopWeb/) (DOCUMENTATION UNFINISHED)
 
 # Tools
 Here some tools to improve your development speed with PoopScript.
