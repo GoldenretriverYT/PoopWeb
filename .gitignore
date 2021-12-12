@@ -29,7 +29,11 @@ bower_components
 # node-waf configuration
 .lock-wscript
 
+# Builds and test files
 builds/
+src/www/
+src/log/
+src/conf/
 
 # Dependency directories
 node_modules/
