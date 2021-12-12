@@ -1,0 +1,5 @@
+;;start ps
+    global->set myText = text;
+    fs->writeToFile myText deez.nuts;
+    ->log File was created.
+;;stop ps

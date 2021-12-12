@@ -1,0 +1,13 @@
+<head>
+    <title>Hi</title>
+</head>
+
+<body>
+    <h1>Welcome!</h1>
+    Does deez.nuts exist:
+;;start ps
+    fs->doesExist doesExistFlag deez.nuts;
+    ->print %%doesExistFlag;
+;;stop ps
+    <button onclick="window.location.href='/createDeezNuts.pw';">Create deez.nuts!</button>
+</body>

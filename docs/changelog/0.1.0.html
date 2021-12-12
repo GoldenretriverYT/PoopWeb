@@ -1,0 +1,47 @@
+<head>
+    <link rel="stylesheet" href="../style/style.css"/>
+    <title>PoopScriptDocs - Version 0.1.0</title>
+</head>
+<body>
+    <script>
+        window.onload = () => {
+            var els = document.getElementsByClassName("navElem");
+
+            for(el of els) {
+                addNavClick(el, el.getAttribute("data-goto"));
+            }
+        }
+
+        function addNavClick(el, to) {
+            el.addEventListener("click", (ev) => {
+                window.history.pushState({}, to, '#' + to);
+
+                document.getElementById(to).scrollIntoView({
+                    "behavior": "smooth"
+                });
+            });
+        }
+    </script>
+
+    <div class="nav" style="position: fixed; top: 0; left: 0;">
+        <div class="navElem" data-goto="title">Version 0.1.0</div>
+        <div class="navElem" data-goto="summary">Summary</div>
+        <div class="navElem" data-goto="new">New</div>
+        <div class="navElem" data-goto="changed">Changed</div>
+        <div class="navElem" data-goto="other">Other changes</div>
+    </div>
+    <div class="content" style="margin-left: 16vw;">
+        <h1 id="title">Version 0.1.0</h1>
+        <h3>Changelog</h3>
+        <span id="summary">Version 0.1.0 was the first version "released", so there is no real changelog here.</span>
+
+        <br><h3>New</h3>
+        Nothing new.
+
+        <br><h3>Changed</h3>
+        Nothing changed.
+
+        <br><h3>Other changes</h3>
+        Nothing.
+    </div>
+</body>
