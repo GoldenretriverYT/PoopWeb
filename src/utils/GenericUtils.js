@@ -1,8 +1,9 @@
 const Config = require("./Config");
 
 /**
- * Prepares a path and replaces placeholders like {pwdir}
- * @param {string} path 
+ * Generates a error page based on title and desc
+ * @param {string} title
+ * @param {string} desc
  */
 module.exports.generateErrorPage = (title, desc) => {
     return `<h1>${title}</h1>
