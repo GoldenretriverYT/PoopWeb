@@ -565,19 +565,7 @@ class PoopScriptEnv {
                     words[i] = words[i].replace(replacementVars[key].regexp, replacementVars[key].val);
                 });
 
-                /*if(words[i].startsWith("%%")) {
-                    if(!(words[i].split("%%")[1] in this.GLOBAL_VARS)) {
-                        words[i] = "undefined";
-                        continue;
-                    }
-
-                    if(this.GLOBAL_VARS[words[i].split("%%")[1]] instanceof Array) {
-                        words[i] = this.GLOBAL_VARS[words[i].split("%%")[1]].join(",");
-                        continue;
-                    }
-
-                    words[i] = this.GLOBAL_VARS[words[i].split("%%")[1]];
-                }else */if(words[i].startsWith("%:")) {
+                if(words[i].startsWith("%:")) {
                     if(!(words[i].split("%:")[1] in scopeVariables)) {
                         words[i] = "undefined";
                         continue;
