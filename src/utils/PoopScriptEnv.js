@@ -384,8 +384,6 @@ class PoopScriptEnv {
         this.#console = console;
 
         for(var rem of removalTemplate) {
-            console.debug("removing " + rem);
-
             if(rem.split("->")[0] in this.GLOBAL_OBJECTS) {
                 if(rem.split("->")[1] in this.GLOBAL_OBJECTS[rem.split("->")[0]]) {
                     delete this.GLOBAL_OBJECTS[rem.split("->")[0]][rem.split("->")[1]];
@@ -450,8 +448,6 @@ class PoopScriptEnv {
 
         var currentlyCommenting = false;
 
-        console.debug(lines);
-
         for(var line of lines) {
             if(Date.now()-this.#mainExecStarted > this.#timeoutTime) {
                 if(iAmMain) {
@@ -478,7 +474,7 @@ class PoopScriptEnv {
             var strContent = "";
 
             preWords.forEach((val, idx) => {
-                if(val.startsWith("\"") && !inStr) {
+                if(val.startsWith("\"") && !val.endsWith("\"") && !inStr) {
                     strStartIdx = idx;
                     inStr = true;
                     strContent = val.substr(1);
@@ -487,7 +483,10 @@ class PoopScriptEnv {
                     inStr = false;
                     words.push(strContent);
                 }else if(inStr) {
+                    console.log(val);
                     strContent += " " + val;
+                }else if(val.startsWith("\"") && val.endsWith("\"")) {
+                    words.push(val.substr(1, val.length-2))
                 }else {
                     if(!isNaN(parseFloat(val))) {
                         words.push(parseFloat(val));
