@@ -1,5 +1,5 @@
 # PoopWeb
-PoopWeb is a simple web server with PoopScript support. The webserver itself is based on Express.
+PoopWeb is a simple web server with PoopScript support. The webserver itself is based on Express. Also, PoopWeb is more like a fun webserver. It isn't meant to be anything professional (just like PoopScript itself) - it works ofc - but I can't guarantee it wont crash. You are probably better off using, idk, apache with php
 
 # How do I use PoopWeb
 To find out how to use PoopWeb, please look at the documentation.
