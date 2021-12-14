@@ -545,8 +545,27 @@ class PoopScriptEnv {
                 continue; 
             }
 
+            var replacementVars = {};
+
+            Object.keys(this.GLOBAL_VARS).forEach((key, idx) => {
+                var val = this.GLOBAL_VARS[key];
+
+                if(this.GLOBAL_VARS[key] instanceof Array) {
+                    val = this.GLOBAL_VARS[key].join(",");
+                }
+
+                replacementVars[key] = {
+                    regexp: new RegExp("(%%" + key + ")", "g"),
+                    val: val
+                }
+            });
+
             for(var i = 0; i < words.length; i++) {
-                if(words[i].startsWith("%%")) {
+                Object.keys(this.GLOBAL_VARS).forEach((key, idx) => {
+                    words[i] = words[i].replace(replacementVars[key].regexp, replacementVars[key].val);
+                });
+
+                /*if(words[i].startsWith("%%")) {
                     if(!(words[i].split("%%")[1] in this.GLOBAL_VARS)) {
                         words[i] = "undefined";
                         continue;
@@ -558,7 +577,7 @@ class PoopScriptEnv {
                     }
 
                     words[i] = this.GLOBAL_VARS[words[i].split("%%")[1]];
-                }else if(words[i].startsWith("%:")) {
+                }else */if(words[i].startsWith("%:")) {
                     if(!(words[i].split("%:")[1] in scopeVariables)) {
                         words[i] = "undefined";
                         continue;
@@ -651,7 +670,7 @@ class PSConst {
         "simpleUsage": ["__globalctx__->alert", "__globalctx__->eval", "__globalctx__->throw", "__globalctx__->error", "custom->run", "custom->returnString", "custom->returnNumber", "custom->resetCustomFunctions"],
         "noVars": ["global->set", "global->unset", "global->assign", "global->reset"],
         "noFuncs": ["custom->run", "custom->returnString", "custom->returnNumber", "custom->reset"],
-        "noResetting": ["global->unset", "global->reset", "custom->reset"],
+        "noResetting": ["global->unset", "global->reset", "custom->reset"]
     };
 }
 
