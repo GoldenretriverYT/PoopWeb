@@ -13,7 +13,7 @@ class MySQLManager {
                                             Config.config.poopscriptSettings.mysql[key].username,
                                             Config.config.poopscriptSettings.mysql[key].password);
             
-            console.log("Created new MySQL connection pool for " + key);
+            console.log("Created new MySQL connection pool for " + key + " --- this does not mean that the login was successful, to check if it was, perform any MySQL operation");
         });
     }
 
