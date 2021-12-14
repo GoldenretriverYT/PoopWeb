@@ -2,7 +2,7 @@ const fs = require("fs");
 const Config = require("./../../utils/Config");
 const Logger = require("./../../utils/Logger");
 const GenericUtils = require("./../../utils/GenericUtils");
-const PoopScriptEnv = require("./../../utils/PoopScriptEnv");
+const { PoopScriptEnv } = require("./../../utils/PoopScriptEnv");
 const { response, request } = require("express");
 
 class PoopScriptFileHandler {
@@ -19,7 +19,7 @@ class PoopScriptFileHandler {
         var poopScriptLines = [];
         var stopExec = false;
 
-        var env = new PoopScriptEnv(PoopScriptEnv.removalTemplates.poopweb);
+        var env = new PoopScriptEnv(["__globalctx__->eval", "__globalctx__->alert"]);
 
         env.setCustomConsoleHandler({
             log: (...args) => {
@@ -63,24 +63,24 @@ class PoopScriptFileHandler {
 
         env.GLOBAL_OBJECTS["fs"] = {
             "readFile": (words, specialData) => {
-                if(fs.existsSync(words.splice(2).join(" "))) {
-                    env.GLOBAL_VARS[words[1]] = fs.readFileSync(words.splice(2).join(" "));
+                if(fs.existsSync(words[2])) {
+                    env.GLOBAL_VARS[words[1]] = fs.readFileSync(words[2]);
                 } else {
                     throw("File not found");
                 }
             },
             "appendToFile": (words) => {
-                if(fs.existsSync(words.splice(2).join(" "))) {
-                    fs.appendFileSync(words.splice(2).join(" "), env.GLOBAL_VARS[words[1]]);
+                if(fs.existsSync(words[1])) {
+                    fs.appendFileSync(words[1], words[2]); // changed syntax in 0.3.0
                 } else {
                     throw("File not found");
                 }
             },
             "writeToFile": (words) => {
-                fs.writeFileSync(words.splice(2).join(" "), env.GLOBAL_VARS[words[1]]);
+                fs.writeFileSync(words[1], words[2]);
             },
             "doesExist": (words) => {
-                if(fs.existsSync(words.splice(2).join(" "))) {
+                if(fs.existsSync(words[2])) {
                     env.GLOBAL_VARS[words[1]] = "yes";
                 } else {
                     env.GLOBAL_VARS[words[1]] = "no";
@@ -88,9 +88,9 @@ class PoopScriptFileHandler {
             },
             "mkdir": (words) => {
                 if(words[1] == "yes") {
-                    fs.mkdirSync(words.splice(2).join(" "), {recursive: true});
+                    fs.mkdirSync(words[2], {recursive: true});
                 } else if(words[1] == "no") {
-                    fs.mkdirSync(words.splice(2).join(" "));
+                    fs.mkdirSync(words[2]);
                 } else {
                     throw "mkdir expects 2 arguments, first one needs to be yes/no (argument: recursive)";
                 }

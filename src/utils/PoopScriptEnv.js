@@ -7,41 +7,32 @@ class PoopScriptEnv {
     #intervalIndex = 0;
     #mainExecStarted = 0;
 
-    static removalTemplates = {
-        "noJavaScript": ["__globalctx__->eval"],
-        "simpleUsage": ["__globalctx__->alert", "__globalctx__->eval", "__globalctx__->throw", "__globalctx__->error", "custom->run", "custom->returnString", "custom->returnNumber", "custom->resetCustomFunctions"],
-        "noVars": ["global->set", "global->unset", "global->assign", "global->reset"],
-        "noFuncs": ["custom->run", "custom->returnString", "custom->returnNumber", "custom->reset"],
-        "noResetting": ["global->unset", "global->reset", "custom->reset"],
-        "poopweb": ["__globalctx__->eval", "__globalctx__->alert"]
-    };
-
     GLOBAL_OBJECTS = {
         __globalctx__: {
             "alert": (words) => {
-                alert(words.splice(1).join(" "));
+                alert(words[1]);
             },
             "log": (words) => {
-                this.#console.log(words.splice(1).join(" "));
+                this.#console.log(words[1]);
             },
             "print": (words) => {
                 if(!("lognnl" in this.#console)) {
                     throw "Print (log without new line) is not supported by current (custom) console. It needs to support: <cc>.lognnl(str);";
                 }
 
-                this.#console.lognnl(words.splice(1).join(" "));
+                this.#console.lognnl(words[1]);
             },
             "warn": (words) => {
-                this.#console.warn(words.splice(1).join(" "));
+                this.#console.warn(words[1]);
             },
             "error": (words) => {
-                this.#console.error(words.splice(1).join(" "));
+                this.#console.error(words[1]);
             },
             "throw": (words) => {
-                throw(words.splice(1).join(" "));
+                throw(words[1]);
             },
             "eval": (words) => {
-                eval(words.splice(1).join(" "));
+                eval(words[1]);
             },
             "pause": (words) => {
                 if(parseFloat(words[1]) > this.#timeoutTime) {
@@ -98,93 +89,74 @@ class PoopScriptEnv {
         global: {
             "set": (words) => {
                 if(words[1] == undefined) { // well, we DO need a name.
-                    throw("No variable name passed to global->set");
+                    throw(PSConst.errors.NO_VAR_PASSED);
                 }
 
                 if((words[1].match(/([^A-Za-z])+/g) || []).length > 0) { // find all matches of non-alpha chars or return empty array instead of NULL
-                    throw("Invalid variable name - only alphabetic names are allowed.");
+                    throw(PSConst.errors.INV_VAR_NAME);
                 }
 
                 if(!(words[2] == "=" || words[2] == "+=" || words[2] == "-=" || words[2] == "++" || words[2] == "--")) { // This is to prevent accidentally not adding a name for the variable and then wondering why its never correctly replaced
-                    throw("No assignment type sign when setting variable. Types: =, +=, -=, ++, --");
+                    throw(PSConst.getError("INV_ASSIGN", "=, +=, -=, ++, --"));
                 }
 
                 if(words[2] == "="){
-                    this.GLOBAL_VARS[words[1]] = words.splice(3).join(" ");
+                    if(isNaN(parseFloat(words[3]))) {
+                        this.GLOBAL_VARS[words[1]] = words[3];
+                    }else {
+                        this.GLOBAL_VARS[words[1]] = parseFloat(words[3]);
+                    }
                 }else if(words[2] == "+=") {
                     if(isNaN(parseFloat(this.GLOBAL_VARS[words[1]]))) {
-                        this.GLOBAL_VARS[words[1]] = this.GLOBAL_VARS[words[1]] + words.splice(3).join(" ");
+                        this.GLOBAL_VARS[words[1]] = this.GLOBAL_VARS[words[1]] + words[3];
                     }else {
                         this.GLOBAL_VARS[words[1]] = parseFloat(this.GLOBAL_VARS[words[1]]) + parseFloat(words[3]);
                     }
                 }else if(words[2] == "-=") {
                     if(isNaN(parseFloat(this.GLOBAL_VARS[words[1]]))) {
-                        if(this.#strict) throw("Unable to subtract from string.");
+                        if(this.#strict) throw("Unable to subtract from non-number.");
                         return;
                     }else {
                         this.GLOBAL_VARS[words[1]] = parseFloat(this.GLOBAL_VARS[words[1]]) - parseFloat(words[3]);
                     }
                 }else if(words[2] == "++") {
                     if(isNaN(parseFloat(this.GLOBAL_VARS[words[1]]))) {
-                        if(this.#strict) throw("Unable to subtract from string.");
+                        if(this.#strict) throw("Unable to increment non-number.");
                         return;
                     }else {
                         this.GLOBAL_VARS[words[1]] = parseFloat(this.GLOBAL_VARS[words[1]]) + 1;
                     }
                 }else if(words[2] == "--") {
                     if(isNaN(parseFloat(this.GLOBAL_VARS[words[1]]))) {
-                        if(this.#strict) throw("Unable to subtract from string.");
+                        if(this.#strict) throw("Unable to decrement non-number.");
                         return;
                     }else {
                         this.GLOBAL_VARS[words[1]] = parseFloat(this.GLOBAL_VARS[words[1]]) - 1;
                     }
                 }
             },
-            "setType": (words) => {
-                if(words[1] == undefined) { // well, we DO need a name.
-                    throw("No variable name passed to global->set");
-                }
-
-                if((words[1].match(/([^A-Za-z])+/g) || []).length > 0) { // find all matches of non-alpha chars or return empty array instead of NULL
-                    throw("Invalid variable name - only alphabetic names are allowed.");
-                }
-
-                if(!(words[2] == "=")) { // This is to prevent accidentally not adding a name for the variable and then wondering why its never correctly replaced
-                    throw("No assignment type sign when setting variable with specific Type. Types: =");
-                }
-
-                if(words[2] == "="){
-                    if(words[3] == "string") {
-                        this.GLOBAL_VARS[words[1]] = words.splice(4).join(" ");
-                    }else if(words[3] == "number") {
-                        this.GLOBAL_VARS[words[1]] = parseFloat(words[4]);
-                    }else if(words[3] == "array") {
-                        this.GLOBAL_VARS[words[1]] = words.splice(4);
-                    }
-                }
-            },
             "assign": (words) => {
                 if(words[1] == undefined) { // well, we DO need a name.
-                    throw("No variable name passed to global->set");
+                    throw(PSConst.errors.NO_VAR_PASSED);
                 }
 
                 if((words[1].match(/([^A-Za-z])+/g) || []).length > 0) { // find all matches of non-alpha chars or return empty array instead of NULL
-                    throw("Invalid variable name - only alphabetic names are allowed.");
+                    throw(PSConst.errors.INV_VAR_NAME);
                 }
 
                 if(!(words[2] == "=")) { // This is to prevent accidentally not adding a name for the variable and then wondering why its never correctly replaced
-                    throw("No valid assignment type sign when assigning variable. Types: =");
+                    throw(PSConst.getError("INV_ASSIGN", "="));
                 }
 
-                this.GLOBAL_VARS[words[1]] = this.exec(words.splice(3).join(" "));
+                this.GLOBAL_VARS[words[1]] = this.exec(words[3]);
             },
             "unset": (words) => {
                 if(words[1] == undefined) { // well, we DO need a name.
-                    throw("No variable name passed to global->unset");
+                    throw(PSConst.errors.NO_VAR_PASSED);
                 }
 
                 if((words[1].match(/([^A-Za-z])+/g) || []).length > 0) { // find all matches of non-alpha chars or return empty array instead of NULL
-                    throw("Invalid variable name - only alphabetic names are allowed.");
+                    throw(PSConst.errors.INV_VAR_NAME);
                 }
 
                 if(!(words[1] in this.GLOBAL_VARS)) {
@@ -266,6 +238,7 @@ class PoopScriptEnv {
         },
         string: {
             "joinWords": (words) => {
+                if(words.length < 3 && this.#strict) throw("STRICT: Insufficient arguments passed to string->joinWords!");
                 return words.splice(2).join(words[1]);
             }
         },
@@ -388,13 +361,16 @@ class PoopScriptEnv {
                 }
             },
             "returnString": (words) => {
-                return words.splice(1).join(" ");
+                return words[1];
             },
             "returnNumber": (words) => {
                 return parseFloat(words[1]);
             },
             "reset": (words) => {
                 this.CUSTOM_FUNCTIONS = {};
+            },
+            "argdbg": (words) => {
+                this.#console.log(words.join("\n-;- next arg -;-\n"));
             }
         }
     }
@@ -408,6 +384,8 @@ class PoopScriptEnv {
         this.#console = console;
 
         for(var rem of removalTemplate) {
+            console.debug("removing " + rem);
+
             if(rem.split("->")[0] in this.GLOBAL_OBJECTS) {
                 if(rem.split("->")[1] in this.GLOBAL_OBJECTS[rem.split("->")[0]]) {
                     delete this.GLOBAL_OBJECTS[rem.split("->")[0]][rem.split("->")[1]];
@@ -446,6 +424,14 @@ class PoopScriptEnv {
             this.#mainExecStarted = Date.now();
         }
 
+        var scopeVariables = {
+            depth: depth,
+            isMain: iAmMain,
+            started: Date.now(),
+            maxExecTime: this.#timeoutTime,
+            strict: this.#strict,
+        }
+
         if(depth > 1000) {
             this.#console.error("Recursion limit reached! You should not go deeper than recursion depth 1000!");
             return;
@@ -464,6 +450,8 @@ class PoopScriptEnv {
 
         var currentlyCommenting = false;
 
+        console.debug(lines);
+
         for(var line of lines) {
             if(Date.now()-this.#mainExecStarted > this.#timeoutTime) {
                 if(iAmMain) {
@@ -473,9 +461,41 @@ class PoopScriptEnv {
 
                 return;
             }
+
             lineIndex++;
 
-            var words = line.replace(/(\\)(\\\\)*;/g, ";").trim().split(" ");
+            for(var gv of Object.keys(this.GLOBAL_VARS)) {
+                if(typeof(this.GLOBAL_VARS[gv]) == "object") {
+                    line = line.replace(new RegExp("/(%" + gv + "/", "g"), this.GLOBAL_VARS[gv]);
+                }
+            }
+
+            var preWords = line.replace(/(\\)(\\\\)*;/g, ";").trim().split(" ");
+            var words = [];
+
+            var strStartIdx = 0;
+            var inStr = false;
+            var strContent = "";
+
+            preWords.forEach((val, idx) => {
+                if(val.startsWith("\"") && !inStr) {
+                    strStartIdx = idx;
+                    inStr = true;
+                    strContent = val.substr(1);
+                }else if(inStr && val.endsWith("\"")) {
+                    strContent += " " + val.substr(0, val.length-1);
+                    inStr = false;
+                    words.push(strContent);
+                }else if(inStr) {
+                    strContent += " " + val;
+                }else {
+                    if(!isNaN(parseFloat(val))) {
+                        words.push(parseFloat(val));
+                    }else {
+                        words.push(val);
+                    }
+                }
+            })
 
             if(words[0] == "-->" && words[1] == "def") {
                 if(currentlyDef.is) {
@@ -492,8 +512,8 @@ class PoopScriptEnv {
                 continue;
             }else if(words[0] == "-->" && words[1] == "end") {
                 if(!currentlyDef.is) {
-                    if(iAmMain) this.#mainExecStarted = 0;
-                    throw("Can not exit definition mode, because you aren't even in definition mode!");
+                    if(this.#strict && iAmMain) this.#mainExecStarted = 0;
+                    if(this.#strict) throw("Can not exit definition mode, because you aren't even in definition mode!");
                 }
 
                 currentlyDef.is = false;
@@ -538,6 +558,13 @@ class PoopScriptEnv {
                     }
 
                     words[i] = this.GLOBAL_VARS[words[i].split("%%")[1]];
+                }else if(words[i].startsWith("%:")) {
+                    if(!(words[i].split("%:")[1] in scopeVariables)) {
+                        words[i] = "undefined";
+                        continue;
+                    }
+
+                    words[i] = scopeVariables[words[i].split("%:")[1]];
                 }else if(words[i].startsWith("%$")) {
                     var sel = words[i].split("%$")[1].split(",");
 
@@ -597,4 +624,40 @@ class PoopScriptEnv {
     }
 }
 
-module.exports = PoopScriptEnv;
+class PSConst {
+    static errors = {
+        "NO_HOOK": "To use this function, you either need to connect to a PSLang-Hook or run PoopScript from NodeJS.",
+        "NO_VAR_PASSED": "No variables was passed to the function.",
+        "NOT_DEF": "There is no variable named liked this.",
+        "INV_VAR_NAME": "Invalid variable name passed. Variables names can only be alphabetical.",
+        "INV_ASSIGN": "No valid assignment type sign when assigning variable. Types: {0}"
+    }
+
+    /** Used if errors have placeholders to fill. */
+    static getError = (err, ...args) => {
+        var result = PSConst.errors[err];
+
+        for(var i = 0; i < args.length; i++) {
+            result = result.replace(new RegExp("\\{" + i + "\\}", "g"), args[i]);
+        }
+
+        return result;
+    }
+
+    static isNode = ((typeof process !== 'undefined') && (process.versions != null) && (process.versions.node != null));
+
+    static removalTemplates = {
+        "noJavaScript": ["__globalctx__->eval"],
+        "simpleUsage": ["__globalctx__->alert", "__globalctx__->eval", "__globalctx__->throw", "__globalctx__->error", "custom->run", "custom->returnString", "custom->returnNumber", "custom->resetCustomFunctions"],
+        "noVars": ["global->set", "global->unset", "global->assign", "global->reset"],
+        "noFuncs": ["custom->run", "custom->returnString", "custom->returnNumber", "custom->reset"],
+        "noResetting": ["global->unset", "global->reset", "custom->reset"],
+    };
+}
+
+if(PSConst.isNode) {
+    module.exports = {PoopScriptEnv, PSConst}
+}else {
+    window.PoopScriptEnv = PoopScriptEnv;
+    window.PSConst = PSConst;
+}
