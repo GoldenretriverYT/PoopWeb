@@ -85,6 +85,15 @@ class PoopScriptFileHandler {
                 } else {
                     env.GLOBAL_VARS[words[1]] = "no";
                 }
+            },
+            "mkdir": (words) => {
+                if(words[1] == "yes") {
+                    fs.mkdirSync(words.splice(2).join(" "), {recursive: true});
+                } else if(words[1] == "no") {
+                    fs.mkdirSync(words.splice(2).join(" "));
+                } else {
+                    throw "mkdir expects 2 arguments, first one needs to be yes/no (argument: recursive)";
+                }
             }
         }
 
