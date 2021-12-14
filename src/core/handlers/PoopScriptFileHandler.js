@@ -114,8 +114,8 @@ class PoopScriptFileHandler {
 
                         res.status(500).send("[ERROR] PoopScript errored out: " + err);
 
-                        Logger.error(req.path + ": PoopScript crashed.");
-                        Logger.error(err.message + " | StackTrace: " + err.stack);
+                        Logger.error(req.path + ": PoopScript crashed. Error: " + err);
+                        Logger.error("Message: " + err.message + " | StackTrace: " + err.stack);
                         
                         stopExec = true;
                         return;
@@ -124,8 +124,8 @@ class PoopScriptFileHandler {
                         console.log(err);
 
                         res.status(500).send(GenericUtils.generateErrorPage("Internal server error", "PoopScript crashed. Check server logs for more information."));
-                        Logger.error(req.path + ": PoopScript crashed.");
-                        Logger.error(err.message + " | StackTrace: " + err.stack);
+                        Logger.error(req.path + ": PoopScript crashed. Error: " + err);
+                        Logger.error("Message: " + err.message + " | StackTrace: " + err.stack);
                         
                         stopExec = true;
                         return;
