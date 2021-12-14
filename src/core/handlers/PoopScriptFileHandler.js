@@ -91,10 +91,10 @@ class PoopScriptFileHandler {
         lines.forEach((line, idx) => {
             if(stopExec) return;
 
-            if(line == ";;start ps" && !poopScriptStarted) {
+            if(line.trim() == ";;start ps" && !poopScriptStarted) {
                 poopScriptLines = [];
                 poopScriptStarted = true;
-            }else if(line == ";;stop ps" && poopScriptStarted) {
+            }else if(line.trim() == ";;stop ps" && poopScriptStarted) {
                 try {
                     poopScriptStarted = false;
                     env.exec(poopScriptLines.join("\n"));
