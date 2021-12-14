@@ -483,7 +483,6 @@ class PoopScriptEnv {
                     inStr = false;
                     words.push(strContent);
                 }else if(inStr) {
-                    console.log(val);
                     strContent += " " + val;
                 }else if(val.startsWith("\"") && val.endsWith("\"")) {
                     words.push(val.substr(1, val.length-2))

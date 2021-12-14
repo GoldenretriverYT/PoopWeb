@@ -80,8 +80,6 @@ class PoopScriptFileHandler {
                 fs.writeFileSync(words[1], words[2]);
             },
             "doesExist": (words) => {
-                console.log(words);
-                console.log(words[2]);
                 if(fs.existsSync(words[2])) {
                     env.GLOBAL_VARS[words[1]] = "yes";
                 } else {
