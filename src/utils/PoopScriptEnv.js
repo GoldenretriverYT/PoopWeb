@@ -479,7 +479,7 @@ class PoopScriptEnv {
                     return;
                 }
 
-                if(val.startsWith("\"") && !val.endsWith("\"") && !inStr) {
+                if(val.startsWith("\"") && (val.length > 1 ? !val.endsWith("\"") : true) && !inStr) {
                     strStartIdx = idx;
                     inStr = true;
                     strContent = val.substr(1);
