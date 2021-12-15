@@ -474,6 +474,11 @@ class PoopScriptEnv {
             var strContent = "";
 
             preWords.forEach((val, idx) => {
+                if(val.startsWith("%{") && val.endsWith("}%")) {
+                    words.push(this.quickMathEval(val.substr(2, val.length-4)));
+                    return;
+                }
+
                 if(val.startsWith("\"") && !val.endsWith("\"") && !inStr) {
                     strStartIdx = idx;
                     inStr = true;
@@ -560,17 +565,17 @@ class PoopScriptEnv {
 
             for(var i = 0; i < words.length; i++) {
                 Object.keys(this.GLOBAL_VARS).forEach((key, idx) => {
-                    words[i] = words[i].replace(replacementVars[key].regexp, replacementVars[key].val);
+                    words[i] = words[i].toString().replace(replacementVars[key].regexp, replacementVars[key].val);
                 });
 
-                if(words[i].startsWith("%:")) {
+                if(words[i].toString().startsWith("%:")) {
                     if(!(words[i].split("%:")[1] in scopeVariables)) {
                         words[i] = "undefined";
                         continue;
                     }
 
                     words[i] = scopeVariables[words[i].split("%:")[1]];
-                }else if(words[i].startsWith("%$")) {
+                }else if(words[i].toString().startsWith("%$")) {
                     var sel = words[i].split("%$")[1].split(",");
 
                     if(!(sel[0] in this.GLOBAL_VARS)) {
@@ -589,7 +594,7 @@ class PoopScriptEnv {
                     }
 
                     words[i] = this.GLOBAL_VARS[sel[0]][parseInt(sel[1])];
-                }else if(words[i].startsWith("%_")) {
+                }else if(words[i].toString().startsWith("%_")) {
                     words[i] = this.exec(this.CUSTOM_FUNCTIONS[words[i].split("%_")[1]].join(";\n"), depth+1);
                 }
             }
@@ -626,6 +631,39 @@ class PoopScriptEnv {
 
         if(iAmMain) this.#mainExecStarted = 0;
         return latestReturn;
+    }
+
+    quickMathEval(query) {
+        if(!(query.split(/([\+\-\/\*])/g).length == 3)) {
+            throw "QuickMath only supports two arguments, left and right. You can use variables to perform more advanced math.";
+        }
+
+        var args = query.split(/([\+\-\/\*])/g);
+
+        if(args[0].toString().startsWith("%%")) {
+            args[0] = parseFloat(this.GLOBAL_VARS[args[0].split("%%")[1]]);
+        }
+
+        if(args[2].toString().startsWith("%%")) {
+            args[2] = parseFloat(this.GLOBAL_VARS[args[2].split("%%")[2]]);
+        }
+
+        args[0] = parseFloat(args[0]);
+        args[2] = parseFloat(args[2]);
+
+        var res = 0;
+
+        if(args[1] == "+") {
+            res = args[0] + args[2];
+        }else if(args[1] == "-") {
+            res = args[0] - args[2];
+        }else if(args[1] == "/") {
+            res = args[0] / args[2];
+        }else if(args[1] == "*") {
+            res = args[0] * args[2];
+        }
+
+        return res.toString();
     }
 }
 
