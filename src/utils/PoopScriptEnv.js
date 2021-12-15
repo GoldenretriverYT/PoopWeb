@@ -473,6 +473,7 @@ class PoopScriptEnv {
             var inStr = false;
             var strContent = "";
 
+            console.log(preWords);
             preWords.forEach((val, idx) => {
                 if(val.startsWith("%{") && val.endsWith("}%")) {
                     words.push(this.quickMathEval(val.substr(2, val.length-4)));
