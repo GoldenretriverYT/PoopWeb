@@ -28,11 +28,8 @@
         <div class="navElem" data-goto="useps">Use PoopWeb</div>
         <div class="navElem" data-goto="conf">Configuration</div>
         <div class="navElem" data-goto="ref">Core Reference</div>
-        <div class="navElem navElemIndent" data-goto="ref__globalctx__">__globalctx__</div>
-        <div class="navElem navElemIndent" data-goto="refglobal">global</div>
-        <div class="navElem navElemIndent" data-goto="refarray">array</div>
-        <div class="navElem navElemIndent" data-goto="refmath">math</div>
-        <div class="navElem navElemIndent" data-goto="refcustom">custom</div>
+        <div class="navElem navElemIndent" data-goto="reffs">fs</div>
+        <div class="navElem navElemIndent" data-goto="refmysql">mysql</div>
         <div class="navElem" data-goto="changelog">Change Log</div>
     </div>
     <div class="content" style="margin-left: 16vw;">
@@ -46,106 +43,27 @@
         the executable for your OS or do <code>node poopweb.js</code> in a command prompt if you cloned the repository and you are directly executing it from the source. Every install of PoopWeb has a included demo index.pw file
         
         <br><h2 id="conf">Configuration</h2>
-        To configure PoopWeb, just edit the config.json file inside the <code>&lt;installation_folder&gt;/conf/</code> folder.
-        
-        <br><h2 id="comments">Comments</h2>
-        PoopScript ofcourse supports comments. To create a comment, start the line with <code>//></code> and it will be ignored. To create a multi-line comment, put your comment between <code>&lt;&lt;//</code> and <code>//>></code><br><br>
-        <div class="warning fullWidth" style="padding-top: 10px; padding-bottom: 10px; font-size: 16px; font-weight: 800; padding-left: 10px;">IMPORTANT: Every comment NEEDS to end with a semi-colon, otherwise it will not be interpreted correctly.</div>
-
-        <br><h2 id="uv">Using variables</h2>
-        To set variables, either use <code>global->set</code> or <code>global->assign</code> - To show/use those variables, just do <code>%%var_name</code> at any point.<br>
-        Example: <code>->log %%my_variable</code><br><br>
-        There is also a quick-syntax for replacing something with the output of a custom function. Use <code>%_func_name</code> to do that. Example:<br>
-        <code class="fullWidth">
-            <span class="sh js-keyword">--> def</span> test;<br>
-            <span class="sh js-class">&nbsp;&nbsp;custom->returnNumber</span> 4;<br>
-            <span class="sh js-keyword">--> end</span>;<br><br>
-
-            <span class="sh js-class">->log</span> %_test;
-        </code><br><br>results in a log like this: <code>4</code><br>
-        Variable names may also only include alphabetic characters (a-zA-Z) - same goes for function names
-
-        <br><h2 id="ucf">Using custom functions</h2>
-        Custom functions are started by a <code><span class="sh js-keyword">--> def</span> [HERE FUNTION NAME];</code> and ended with a <code><span class="sh js-keyword">--> end</span>;</code>. Within those functions you can do whatever you want.<br>
-        To execute these functions, either use <code><span class="sh js-class">custom->run</span> [func name]</code> or add a <code>%_func_name</code> anywhere you need it.<br>
-        By using <code><span class="sh js-class">custom->returnString</span></code> or <code><span class="sh js-class">custom->returnNumber</span></code> you can return values to the caller.
-
-        <br><h2 id="ucjsf">Using custom js functions</h2>
-        To add custom JS functions to your PoopScript environment, you will need to diretly modify the GLOBAL_OBJECTS object. The interpreter passes 1 argument. The argument "words" is an array including all words in the command splitted by spaces. The first word also is the selector, so the first argument would be words[1] - words[0] would be <code>__globalctx__->myFunction</code>
-        <br>Example for adding a pow function:<br><code class="fullWidth">
-            env.<span class="sh js-keyword">GLOBAL_OBJECTS</span>.math.pow = (words) => {<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;<span class="sh js-keyword">return</span> <span class="sh js-class">parseFloat</span>(words[1]) ** <span class="sh js-class">parseFloat</span>(words[2]);<br>
-            }
-        </code><br><br>
-        To trigger errors, just throw them. The interpreter handles them and shows the error when executing the script. To access variables, you can do <code>env.GLOBAL_VARS["myvar"]</code>
+        To configure PoopWeb, just edit the config.json file inside the <code>&lt;installation_folder&gt;/conf/</code> folder. Inside of this configuration file you can add more MySQL pools, change the port, the main directory, etc.
 
         <br><h2 id="ref">Core reference</h2>
-        <code style="font-size: 16px; font-weight: 800;" id="ref__globalctx__">__globalctx__</code><br>
-        __globalctx__ is a special object either called by using <code>->method</code> or <code>__globalctx__->method</code>
+        PoopWeb adds some special features that are not available in PoopScript.<br><br>
+        <code style="font-size: 16px; font-weight: 800;" id="reffs">fs</code><br>
+        fs is a library to access the files on the server.
         <ul>
-            <li><code>log [string]</code>: Calls the log method on the specified console handler</li>
-            <li><code>warn [string]</code>: Calls the warn method on the specified console handler</li>
-            <li><code>error [string]</code>: Calls the error method on the specified console handler</li>
-            <li><code>print [string]</code>: Calls the lognnl (log no new line) method on the specified console handler</li>
-            <li><code>alert [string]</code>: Creates an alert with text</li>
-            <li><code>eval [string]</code>: Executes the JS eval function</li>
-            <li><code>throw [string]</code>: Throws an error</li>
-            <li><code>pause [number]</code>: Pauses the execution for x ms (unrecommended, use custom->runIn instead)</li>
+            <li><code>fs->readFile [toStoreVariable (word)] [path (string)]</code>: Reads a file and stores its contents inside toStoreVariable</li>
+            <li><code>fs->appendToFile [toAppendVariable (word)] [path (string)]</code>: Appends the contents of toAppendVariable to file</li>
+            <li><code>fs->writeToFile [toWriteVariable (word)] [path (string)]</code>: Writes the contents of toWriteVariable to file</li>
+            <li><code>fs->doesExist [flagVariable (word)] [path (string)]</code>: Sets flagVariable to yes or no, depending if path exists</li>
+            <li><code>fs->mkdir [recursive (yes/no)] [path (string)]</code>: Creates the path, recursively if set to "yes"</li>
         </ul>
         <br>
-        <code style="font-size: 16px; font-weight: 800;" id="refglobal">global</code><br>
-        global is the global variable scope. Originally, there was a local scope planned too but it wasnt implemented.
+        <code style="font-size: 16px; font-weight: 800;" id="refmysql">mysql</code><br>
+        mysql is a library that adds (My)SQL functionality.
         <ul>
-            <li><code>set [word (var name)] [word (assignment type)] [string|number (var val)]</code>: Converts value to string sets the variable to the value (assignment types: =, +=, -=, ++, --)</li>
-            <li><code>setType [word (var name)] = [type (string, number, array)] [string|number|word list]</code>: Sets a variable to a specific type. To set an array for example, use <code>global->setType myVar = array 3 1 4 0</code></li>
-            <li><code>unset [word (var name)]</code>: Removes a variable.</li>
-            <li><code>assign [word (var name)] [word (assignment type)] [string (PoopScript code)]</code>: Runs the one-line (!) PoopScript code. (assignment types: =)</li>
-            <li><code>reset</code>: Removes all global variables.</li>
+            <li><code>mysql->selectConnection [word (connection name)]</code>: Selects a connection pool from the config.</li>
+            <li><code>mysql->query [word (output var name)] [word (callback function name)] [string (query)] ...[any (prepared arguments)]</code>: Performs a SQL query on the selected connection pool.</li>
         </ul>
-        <br>
-        <code style="font-size: 16px; font-weight: 800;" id="refarray">array</code><br>
-        Arrays are lists of items. Arrays in PoopScript are work in progress and might change in future versions.
-        <ul>
-            <li><code>push [word (array name)] [string|number]</code>: Adds element to the array</li>
-            <li><code>pop [word (array name)]</code>: Removes the last element from the array.</li>
-            <li><code>set [word (array name)] [number (index)] = [string|number (value)]</code>: Sets a specific value at index.</li>
-        </ul>
-        <br>
-        <code style="font-size: 16px; font-weight: 800;" id="refmath">math</code><br>
-        math is the object used to calculate, since there are currently no operators.
-        <ul>
-            <li><code>sum [number] [number]</code>: Summation</li>
-            <li><code>sub [number] [number]</code>: Subtraction</li>
-            <li><code>div [number] [number]</code>: Division</li>
-            <li><code>mul [number] [number]</code>: Multiplication</li>
-            <li><code>pow [number] [number]</code>: x to the power of y</li>
-            <li><code>sqrt [number]</code>: Square root of x</li>
-            <li><code>sin [number]</code></li>
-            <li><code>cos [number]</code></li>
-            <li><code>tan [number]</code></li>
-            <li><code>sinh [number]</code></li>
-            <li><code>cosh [number]</code></li>
-            <li><code>tanh [number]</code></li>
-        </ul>
-        <br>
-        <code style="font-size: 16px; font-weight: 800;" id="refcustom">custom</code><br>
-        custom is the object used to run custom functions or return values in custom functions.
-        <ul>
-            <li><code>run [word]</code>: Runs the custom function specified</li>
-            <li><code>runIn [word] [number]</code>: Runs the custom function specified in x ms (this does not block the thread!)</li>
-            <li><code>runEvery [word] [number]</code>: Runs the custom function specified every x ms (this does not block the thread!)</li>
-            <li><code>runIf [left] ==/>/&lt; [right] [target function]</code>: Runs the custom function if left and right does pass the comparision.</li>
-            <li><code>runIfElse [left] ==/>/&lt; [right] [target function] [else target function]</code>: Runs the target function if left and right does pass the comparision and the else target function if not.</li>
-            <li><code>returnString [string]</code>: Returns the given string in your custom function</li>
-            <li><code>returnNumber [number]</code>: Returns the given number in your custom, function</li>
-            <li><code>resetCustomFunctions</code>: Resets all custom functions.</li>
-        </ul>
-
         <br><h2 id="changelog">Change Log</h2>
-        <ul>
-            <li><a href="changelog/0.3.0.html">Version 0.3.0</a></li>
-            <li><a href="changelog/0.2.0.html">Version 0.2.0</a></li>
-            <li><a href="changelog/0.1.0.html">Version 0.1.0</a></li>
-        </ul>
+        Check the GitHub releases for changelogs.
     </div>
 </body>
