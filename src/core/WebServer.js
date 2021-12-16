@@ -10,7 +10,7 @@ const PathUtils = require("../utils/PathUtils");
 const GenericUtils = require("../utils/GenericUtils");
 
 class WebServer {
-    static init() {
+    static async init() {
         if(!fs.existsSync(PathUtils.preparePath(Config.config.hostDirectory))) {
             fs.mkdirSync(PathUtils.preparePath(Config.config.hostDirectory), {recursive: true});
         }
@@ -21,7 +21,7 @@ class WebServer {
         app.use(express.urlencoded({ extended: true }));
         app.use(express.json());
 
-        app.use("*", (req, res) => {
+        app.use("*", async (req, res) => {
             var urlParsed = new URL(req.protocol + '://' + req.get('host') + req.originalUrl);
             
             Logger.log(urlParsed.pathname + " | query: " + urlParsed.search + " | ip: " + req.socket.remoteAddress);
@@ -46,13 +46,13 @@ class WebServer {
             
             var extFound = false;
             
-            Object.keys(Config.config.extensionHandlers).forEach((ext) => {
+            for(var ext of Object.keys(Config.config.extensionHandlers)) {
                 if(Config.config.extensionHandlers[ext] == "poopscript" || Config.config.extensionHandlers[ext] == "sendfile") {
                     if(modifiedUrl.endsWith(ext)) {
                         if(Config.config.extensionHandlers[ext] == "poopscript") {
-                            PoopScriptFileHandler.handleFile(PathUtils.preparePath(Config.config.hostDirectory + modifiedUrl), req, res);
+                            await PoopScriptFileHandler.handleFile(PathUtils.preparePath(Config.config.hostDirectory + modifiedUrl), req, res);
                         }else if(Config.config.extensionHandlers[ext] == "sendfile") {
-                            DefaultFileHandler.handleFile(PathUtils.preparePath(Config.config.hostDirectory + modifiedUrl), req, res);
+                            await DefaultFileHandler.handleFile(PathUtils.preparePath(Config.config.hostDirectory + modifiedUrl), req, res);
                         }
 
                         extFound = true;
@@ -62,7 +62,7 @@ class WebServer {
                     Logger.error(modifiedUrl + ": Invalid extension handler defined for " + ext);
                     return;
                 }
-            });
+            };
 
             if(extFound) return;
             
@@ -73,9 +73,9 @@ class WebServer {
             }
 
             if(Config.config.extensionHandlers["default"] == "poopscript") {
-                PoopScriptFileHandler.handleFile(PathUtils.preparePath(Config.config.hostDirectory + modifiedUrl), req, res);
+                await PoopScriptFileHandler.handleFile(PathUtils.preparePath(Config.config.hostDirectory + modifiedUrl), req, res);
             }else if(Config.config.extensionHandlers["default"] == "sendfile") {
-                DefaultFileHandler.handleFile(PathUtils.preparePath(Config.config.hostDirectory + modifiedUrl), req, res);
+                await DefaultFileHandler.handleFile(PathUtils.preparePath(Config.config.hostDirectory + modifiedUrl), req, res);
             }
         });
 

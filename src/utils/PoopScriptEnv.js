@@ -442,7 +442,7 @@ class PoopScriptEnv {
     }
 
     /** Execute any PoopScript code */
-    exec(src, depth = 0) {
+    async exec(src, depth = 0) {
         var iAmMain = false;
 
         if(this.#mainExecStarted == 0) {
@@ -488,11 +488,11 @@ class PoopScriptEnv {
 
             lineIndex++;
 
-            for(var gv of Object.keys(this.GLOBAL_VARS)) {
+            /*for(var gv of Object.keys(this.GLOBAL_VARS)) {
                 if(typeof(this.GLOBAL_VARS[gv]) == "object") {
                     line = line.replace(new RegExp("/(%" + gv + ")/", "g"), this.GLOBAL_VARS[gv]);
                 }
-            }
+            } weird code, add back if needed */
 
             var preWords = line.replace(/(\\)(\\\\)*;/g, ";").trim().split(" ");
             var words = [];
@@ -581,8 +581,8 @@ class PoopScriptEnv {
             Object.keys(this.GLOBAL_VARS).forEach((key, idx) => {
                 var val = this.GLOBAL_VARS[key];
 
-                if(this.GLOBAL_VARS[key] instanceof Array) {
-                    val = this.GLOBAL_VARS[key].join(",");
+                if(typeof(this.GLOBAL_VARS[key]) == "object") {
+                    val = JSON.stringify(this.GLOBAL_VARS[key]);
                 }
 
                 replacementVars[key] = {
@@ -637,7 +637,7 @@ class PoopScriptEnv {
             if(_obj in this.GLOBAL_OBJECTS) {
                 if(_method in this.GLOBAL_OBJECTS[_obj]) {
                     try {
-                        latestReturn = this.GLOBAL_OBJECTS[_obj][_method](words, {depth: depth});
+                        latestReturn = await this.GLOBAL_OBJECTS[_obj][_method](words, {depth: depth});
 
                         if(_method == "returnString" || _method == "returnNumber") {
                             if(iAmMain) this.#mainExecStarted = 0;

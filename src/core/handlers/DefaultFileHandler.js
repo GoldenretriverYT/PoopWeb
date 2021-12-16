@@ -8,7 +8,7 @@ class DefaultFileHandler {
      * @param {request} req 
      * @param {response} res 
      */
-    static handleFile(filePath, req, res) {
+    static async handleFile(filePath, req, res) {
         res.status(200).send(fs.readFileSync(filePath).toString());
     }
 }

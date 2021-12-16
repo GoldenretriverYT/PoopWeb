@@ -14,12 +14,14 @@ class MySQLClient {
     }
 
     query(query, args) {
-        this.#pool.query(query, args, (err, res, fields) => {
-            if(err) {
-                throw "MySQL error: " + err;
-            }
-
-            return res;
+        return new Promise((resolve, reject) => {
+            this.#pool.query(query, args, (err, res, fields) => {
+                if(err) {
+                    reject("MySQL error: " + err);
+                }
+    
+                resolve(res);
+            });
         });
     }
 }

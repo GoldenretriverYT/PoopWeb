@@ -4,6 +4,8 @@ const Logger = require("./../../utils/Logger");
 const GenericUtils = require("./../../utils/GenericUtils");
 const { PoopScriptEnv } = require("./../../utils/PoopScriptEnv");
 const { response, request } = require("express");
+const MySQLManager = require("../../mysql/MySQLManager");
+const MySQLClient = require("../../mysql/MySQLClient");
 
 class PoopScriptFileHandler {
     /**
@@ -12,12 +14,13 @@ class PoopScriptFileHandler {
      * @param {request} req 
      * @param {response} res 
      */
-    static handleFile(filePath, req, res) {
+    static async handleFile(filePath, req, res) {
         var lines = fs.readFileSync(filePath).toString().split(/(\r\n|\r|\n)/g);
         var linesResult = [];
         var poopScriptStarted = false;
         var poopScriptLines = [];
         var stopExec = false;
+        var halt = false;
 
         var env = new PoopScriptEnv(["__globalctx__->eval", "__globalctx__->alert"]);
 
@@ -58,6 +61,9 @@ class PoopScriptFileHandler {
                 
                 stopExec = true;
                 return;
+            },
+            "vardump": (words) => {
+                linesResult.push(JSON.stringify(env.GLOBAL_VARS));
             }
         }
 
@@ -97,7 +103,33 @@ class PoopScriptFileHandler {
             }
         }
 
-        lines.forEach((line, idx) => {
+        /** @type {MySQLClient} */
+        var mysqlSelected = null;
+
+        env.GLOBAL_OBJECTS["mysql"] = {
+            "selectConnection": (words) => {
+                if(words[1] in MySQLManager.clients) {
+                    mysqlSelected = MySQLManager.clients[words[1]];
+                } else {
+                    throw "This connection was defined in the configuration";
+                }
+            },
+            "query": async (words) => {
+                if(mysqlSelected == null) throw "Use mysql->selectConnection first before performing a query.";
+                halt = true;
+
+                var res = await mysqlSelected.query(words[3], words.splice(4, words.length));
+
+                console.log(res);
+                env.GLOBAL_VARS[words[1]] = res;
+
+                await env.exec(env.CUSTOM_FUNCTIONS[words[2]].join(";\n"));
+
+                halt = false;
+            }
+        }
+
+        for(var line of lines) {
             if(stopExec) return;
 
             if(line.trim() == ";;start ps" && !poopScriptStarted) {
@@ -106,7 +138,7 @@ class PoopScriptFileHandler {
             }else if(line.trim() == ";;stop ps" && poopScriptStarted) {
                 try {
                     poopScriptStarted = false;
-                    env.exec(poopScriptLines.join("\n"));
+                    await env.exec(poopScriptLines.join("\n"));
                 } catch(err) {
                     if(Config.config.poopscriptSettings.errorHandling == "print_error") {
                         console.log("Oops! PoopScript crashed!");
@@ -136,10 +168,29 @@ class PoopScriptFileHandler {
             }else {
                 linesResult.push(line);
             }
-        });
+        };
+
+        var ticks = 0;
+        while(halt) {
+            ticks++;
+            await sleep(10);
+
+            if(ticks > 500) {
+                res.status(408).send("Requested timed out.");
+                return;
+            }
+        }
 
         res.status(200).send(linesResult.join("\n"));
     }
+}
+
+function sleep(ms) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve();
+        }, ms);
+    });
 }
 
 module.exports = PoopScriptFileHandler;
