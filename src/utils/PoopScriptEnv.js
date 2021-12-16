@@ -62,6 +62,7 @@ class PoopScriptEnv {
                 return parseFloat(words[1]) * parseFloat(words[2]);
             },
             "pow": (words) => {
+                console.log(words);
                 return parseFloat(words[1]) ** parseFloat(words[2]);
             },
             "sqrt": (words) => {
@@ -240,6 +241,33 @@ class PoopScriptEnv {
             "joinWords": (words) => {
                 if(words.length < 3 && this.#strict) throw("STRICT: Insufficient arguments passed to string->joinWords!");
                 return words.splice(2).join(words[1]);
+            }
+        },
+        json: {
+            "store": (words) => {
+                this.GLOBAL_VARS[words[1]] = JSON.parse(words[2]);      
+            },
+            "get": (words) => {
+                if(typeof(this.GLOBAL_VARS[words[1]]) == "object") {
+                    if(!(words[2] in this.GLOBAL_VARS[words[1]])) {
+                        throw "Can not access key " + words[2] + " in JSON-object stored in var " + words[1];
+                    }
+
+                    return this.GLOBAL_VARS[words[1]][words[2]];
+                } else {
+                    throw "Variable is not a JSON-like object.";
+                }
+            },
+            "set": (words) => {
+                if(typeof(this.GLOBAL_VARS[words[1]]) == "object") {
+                    if(!(words[3] in this.GLOBAL_VARS)) {
+                        throw "Can not set key " + words[2] + " to var-value of " + words[3] + " since it does not exist.";
+                    }
+
+                    this.GLOBAL_VARS[words[1]][words[2]] = words[3];
+                } else {
+                    throw "Variable is not a JSON-like object.";
+                }
             }
         },
         custom: {
@@ -462,7 +490,7 @@ class PoopScriptEnv {
 
             for(var gv of Object.keys(this.GLOBAL_VARS)) {
                 if(typeof(this.GLOBAL_VARS[gv]) == "object") {
-                    line = line.replace(new RegExp("/(%" + gv + "/", "g"), this.GLOBAL_VARS[gv]);
+                    line = line.replace(new RegExp("/(%" + gv + ")/", "g"), this.GLOBAL_VARS[gv]);
                 }
             }
 
@@ -479,23 +507,23 @@ class PoopScriptEnv {
                     return;
                 }
 
-                if(val.startsWith("\"") && (val.length > 1 ? !val.endsWith("\"") : true) && !inStr) {
+                if((val.startsWith("\"") && !val.startsWith("\\\"")) && (val.length > 1 ? !val.endsWith("\"") : true) && !inStr) {
                     strStartIdx = idx;
                     inStr = true;
-                    strContent = val.substr(1);
-                }else if(inStr && val.endsWith("\"")) {
+                    strContent = val.substr(1).replace(/(\\\")/g, "\"");
+                }else if(inStr && val.endsWith("\"") && !val.endsWith("\\\"")) {
                     strContent += " " + val.substr(0, val.length-1);
                     inStr = false;
-                    words.push(strContent);
+                    words.push(strContent.replace(/(\\\")/g, "\""));
                 }else if(inStr) {
-                    strContent += " " + val;
-                }else if(val.startsWith("\"") && val.endsWith("\"")) {
-                    words.push(val.substr(1, val.length-2))
+                    strContent += " " + val.replace(/(\\\")/g, "\"");
+                }else if(val.startsWith("\"") && !val.startsWith("\\\"") && val.endsWith("\"") && !val.endsWith("\\\"")) {
+                    words.push(val.substr(1, val.length-2).replace(/(\\\")/g, "\""))
                 }else {
                     if(!isNaN(parseFloat(val))) {
                         words.push(parseFloat(val));
                     }else {
-                        words.push(val);
+                        words.push(val.replace(/(\\\")/g, "\""));
                     }
                 }
             })
