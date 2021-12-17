@@ -139,7 +139,7 @@ class PoopScriptFileHandler {
                 console.log(res);
                 env.GLOBAL_VARS[words[1]] = res;
 
-                await env.exec(env.CUSTOM_FUNCTIONS[words[2]].join(";\n")).catch((err) => { throw "PSFH:142" + err; });
+                await env.exec(env.CUSTOM_FUNCTIONS[words[2]].join(";\n")).catch((err) => { throw err; });
 
                 halt = false;
             }

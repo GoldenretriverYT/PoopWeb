@@ -271,12 +271,12 @@ class PoopScriptEnv {
             }
         },
         custom: {
-            "run": (words, specialData) => {
-                return this.exec(this.CUSTOM_FUNCTIONS[words[1]].join(";\n"), specialData.depth+1);
+            "run": async (words, specialData) => {
+                return await this.exec(this.CUSTOM_FUNCTIONS[words[1]].join(";\n"), specialData.depth+1).catch((err) => { throw err; });
             },
-            "runIn": (words, specialData) => {
-                setTimeout(() => {
-                    this.exec(this.CUSTOM_FUNCTIONS[words[1]].join(";\n"), specialData.depth+1);
+            "runIn": async(words, specialData) => {
+                setTimeout(async () => {
+                    await this.exec(this.CUSTOM_FUNCTIONS[words[1]].join(";\n"), specialData.depth+1).catch((err) => { throw err; });
                 }, words[2]);
                 
                 return true;
