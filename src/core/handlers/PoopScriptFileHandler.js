@@ -73,6 +73,13 @@ class PoopScriptFileHandler {
             },
             "vardump": (words) => {
                 linesResult.push(JSON.stringify(env.GLOBAL_VARS));
+            },
+            "getHeader": (words) => {
+                if(words.length > 2) {
+                    env.GLOBAL_VARS[words[2]] = req.get(words[1]);
+                }else {
+                    return req.get(words[1]);
+                }
             }
         }
 

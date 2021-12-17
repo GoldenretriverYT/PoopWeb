@@ -93,7 +93,7 @@ class PoopScriptEnv {
                     throw(PSConst.errors.NO_VAR_PASSED);
                 }
 
-                if((words[1].match(/([^A-Za-z])+/g) || []).length > 0) { // find all matches of non-alpha chars or return empty array instead of NULL
+                if((words[1].match(/([^A-Za-z0-9])+/g) || []).length > 0) { // find all matches of non-alpha chars or return empty array instead of NULL
                     throw(PSConst.errors.INV_VAR_NAME);
                 }
 
@@ -141,7 +141,7 @@ class PoopScriptEnv {
                     throw(PSConst.errors.NO_VAR_PASSED);
                 }
 
-                if((words[1].match(/([^A-Za-z])+/g) || []).length > 0) { // find all matches of non-alpha chars or return empty array instead of NULL
+                if((words[1].match(/([^A-Za-z0-9])+/g) || []).length > 0) { // find all matches of non-alpha chars or return empty array instead of NULL
                     throw(PSConst.errors.INV_VAR_NAME);
                 }
 
@@ -156,7 +156,7 @@ class PoopScriptEnv {
                     throw(PSConst.errors.NO_VAR_PASSED);
                 }
 
-                if((words[1].match(/([^A-Za-z])+/g) || []).length > 0) { // find all matches of non-alpha chars or return empty array instead of NULL
+                if((words[1].match(/([^A-Za-z0-9])+/g) || []).length > 0) { // find all matches of non-alpha chars or return empty array instead of NULL
                     throw(PSConst.errors.INV_VAR_NAME);
                 }
 
@@ -180,8 +180,8 @@ class PoopScriptEnv {
                     throw("No variable name passed to global->set");
                 }
 
-                if((words[1].match(/([^A-Za-z])+/g) || []).length > 0) { // find all matches of non-alpha chars or return empty array instead of NULL
-                    throw("Invalid variable name - only alphabetic names are allowed.");
+                if((words[1].match(/([^A-Za-z0-9])+/g) || []).length > 0) { // find all matches of non-alpha chars or return empty array instead of NULL
+                    throw(PSConst.errors.INV_VAR_NAME);
                 }
 
                 if(!(words[1] in this.GLOBAL_VARS)) {
@@ -199,8 +199,8 @@ class PoopScriptEnv {
                     throw("No variable name passed to global->set");
                 }
 
-                if((words[1].match(/([^A-Za-z])+/g) || []).length > 0) { // find all matches of non-alpha chars or return empty array instead of NULL
-                    throw("Invalid variable name - only alphabetic names are allowed.");
+                if((words[1].match(/([^A-Za-z0-9])+/g) || []).length > 0) { // find all matches of non-alpha chars or return empty array instead of NULL
+                    throw(PSConst.errors.INV_VAR_NAME);
                 }
 
                 if(!(words[1] in this.GLOBAL_VARS)) {
@@ -218,8 +218,8 @@ class PoopScriptEnv {
                     throw("No variable name passed to global->set");
                 }
 
-                if((words[1].match(/([^A-Za-z])+/g) || []).length > 0) { // find all matches of non-alpha chars or return empty array instead of NULL
-                    throw("Invalid variable name - only alphabetic names are allowed.");
+                if((words[1].match(/([^A-Za-z0-9])+/g) || []).length > 0) { // find all matches of non-alpha chars or return empty array instead of NULL
+                    throw(PSConst.errors.INV_VAR_NAME);
                 }
 
                 if(!(words[1] in this.GLOBAL_VARS)) {
@@ -700,7 +700,7 @@ class PSConst {
         "NO_HOOK": "To use this function, you either need to connect to a PSLang-Hook or run PoopScript from NodeJS.",
         "NO_VAR_PASSED": "No variables was passed to the function.",
         "NOT_DEF": "There is no variable named liked this.",
-        "INV_VAR_NAME": "Invalid variable name passed. Variables names can only be alphabetical.",
+        "INV_VAR_NAME": "Invalid variable name passed. Variables names can only be alphanumerical.",
         "INV_ASSIGN": "No valid assignment type sign when assigning variable. Types: {0}"
     }
 
