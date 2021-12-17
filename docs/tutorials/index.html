@@ -1,0 +1,66 @@
+<head>
+    <link rel="stylesheet" href="../style/style.css"/>
+    <title>PoopScriptDocs - Main</title>
+</head>
+<body>
+    <script>
+        window.onload = () => {
+            var els = document.getElementsByClassName("navElem");
+
+            for(el of els) {
+                addNavClick(el, el.getAttribute("data-goto"));
+            }
+        }
+
+        function addNavClick(el, to) {
+            el.addEventListener("click", (ev) => {
+                window.history.pushState({}, to, '#' + to);
+
+                document.getElementById(to).scrollIntoView({
+                    "behavior": "smooth"
+                });
+            });
+        }
+    </script>
+
+    <div class="nav" style="position: fixed; top: 0; left: 0;">
+        <div class="navElem" data-goto="inf">Tutorial hub</div>
+        <div class="navElem" data-goto="st">Starting tutorials</div>
+        <div class="navElem" data-goto="sql">Database tutorials</div>
+        <div class="navElem" data-goto="gen">Generic tutorials</div>
+        <div class="navElem" data-goto="moresoon">More soon</div>
+    </div>
+    <div class="content" style="margin-left: 16vw;">
+        <h1 id="inf">Tutorial hub</h1>
+        Welcome to the PoopWeb tutorial hub. Here you can take a look at many tutorials showing you how to use all of the PoopWeb features. You will learn about how to setup a PoopWeb server, inserting dynamic content and even performing (safe) SQL queries with a database.
+
+        <h2 id="st">Starting tutorials</h2>
+        These are basic tutorials to get you starting.
+
+        <ul>
+            <li><a href="starting/setup.html">Setting up a PoopWeb server</a></li>
+            <li><a href="starting/basic_page.html">Creating a basic page</a></li>
+            <li><a href="starting/dynamic.html">First dynamic content</a></li>
+        </ul>
+
+        <h2 id="sql">Database tutorials</h2>
+        PoopWeb only supports SQL databases, so in these tutorials, you are gonna learn how to use the mysql library in PoopWeb.
+
+        <ul>
+            <li><a href="mysql/prepare.html">Prepare PoopWeb for using a SQL database</a></li>
+            <li><a href="mysql/firstquery.html">First query</a></li>
+            <li><a href="mysql/reading_result.html">Reading the result</a></li>
+            <li><a href="mysql/safe_query.html">Perform dynamic queries safely</a></li>
+        </ul>
+
+        <h2 id="gen">Generic tutorials</h2>
+        These are generic tutorials to show you some things.
+
+        <ul>
+            <li><a href="generic/cron.html">Using Cron to automatically start your PoopWeb server after reboots</a></li>
+        </ul>
+
+        <h2 id="moresoon">More soon</h2>
+        I am trying to add new tutorials regularly so everyone knows about everything PoopWeb can do.
+    </div>
+</body>

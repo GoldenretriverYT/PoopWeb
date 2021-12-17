@@ -3,7 +3,7 @@ const Config = require("./../../utils/Config");
 const Logger = require("./../../utils/Logger");
 const GenericUtils = require("./../../utils/GenericUtils");
 const { PoopScriptEnv } = require("./../../utils/PoopScriptEnv");
-const { response, request } = require("express");
+const { response, request, query } = require("express");
 const MySQLManager = require("../../mysql/MySQLManager");
 const MySQLClient = require("../../mysql/MySQLClient");
 
@@ -17,15 +17,51 @@ class PoopScriptFileHandler {
     static async handleFile(filePath, req, _res) {
         var lines = fs.readFileSync(filePath).toString().split(/(\r\n|\r|\n)/g);
 
+        lines = lines.filter((val) => {
+            if(val == "\r\n" || val == "\n") return false;
+            return true;
+        });
+
         var linesResult = [];
         var poopScriptStarted = false;
         var poopScriptLines = [];
 
         var stopExec = false;
         var halt = false;
+        var maxHaltMs = 5000;
+
+        /** @type {response} */
         var res = _res;
 
         var overrideStatus = -1;
+
+        var idx = 0;
+
+        for(var line of lines) { // Metadata reading
+            idx++;
+
+            if(line.startsWith("#+")) {
+                var args = line.split(" ");
+
+                if(args[1] == "METHODS") {
+                    if(!([...args].splice(1).includes(req.method))) {
+                        res.status(405).send(GenericUtils.generateErrorPage("Method not allowed", "This resource does not allow the " + req.method + " method."));
+                        return;
+                    }
+                }else if(args[1] == "MAX_HALT_MS") {
+                    if(!isNaN(parseInt(args[2]))) {
+                        maxHaltMs = parseInt(args[2]);
+                    }else {
+                        res.status(500).send(GenericUtils.generateErrorPage("Internal server error", args[2] + " is an invalid option for MAX_HALT_MS attribute. It must be an integer."));
+                        return;
+                    }
+                }
+            } else {
+                lines = lines.splice(idx);
+                break;
+            }
+        }
+
 
         var env = new PoopScriptEnv(["__globalctx__->eval", "__globalctx__->alert"]);
 
@@ -74,12 +110,25 @@ class PoopScriptFileHandler {
             "vardump": (words) => {
                 linesResult.push(JSON.stringify(env.GLOBAL_VARS));
             },
-            "getHeader": async (words) => {
+            "getHeader": (words) => {
                 if(words.length > 2) {
                     env.GLOBAL_VARS[words[2]] = req.get(words[1]);
                 }else {
                     throw("web->getHeader expects two arguments: [header] [toStoreVariable]");
                 }
+            },
+            "setHeader": (words) => {
+                if(words.length > 2) {
+                    res.set(words[1], words[2]);
+                }else {
+                    throw("web->setHeader expects two arguments: [header] [value]")
+                }
+            },
+            "redirect": (words) => {
+                res.redirect(words[1]);
+
+                stopExec = true;
+                return;
             }
         }
 
@@ -119,6 +168,14 @@ class PoopScriptFileHandler {
             }
         }
 
+        for(var queryKey of Object.keys(req.query)) {
+            env.GLOBAL_VARS["query_" + queryKey] = req.query[queryKey];
+        }
+
+        for(var bodyKey of Object.keys(req.body)) {
+            env.GLOBAL_VARS["body_" + bodyKey] = req.body[bodyKey];
+        }
+
         /** @type {MySQLClient} */
         var mysqlSelected = null;
 
@@ -136,7 +193,6 @@ class PoopScriptFileHandler {
 
                 var res = await mysqlSelected.query(words[3], words.splice(4, words.length));
 
-                console.log(res);
                 env.GLOBAL_VARS[words[1]] = res;
 
                 await env.exec(env.CUSTOM_FUNCTIONS[words[2]].join(";\n")).catch((err) => { throw err; });
@@ -187,11 +243,12 @@ class PoopScriptFileHandler {
         };
 
         var ticks = 0;
+
         while(halt) {
             ticks++;
             await sleep(10);
 
-            if(ticks > 500) {
+            if(ticks > maxHaltMs/10) {
                 res.status(408).send("Requested timed out.");
                 return;
             }
