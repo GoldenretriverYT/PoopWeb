@@ -14,13 +14,18 @@ class PoopScriptFileHandler {
      * @param {request} req 
      * @param {response} res 
      */
-    static async handleFile(filePath, req, res) {
+    static async handleFile(filePath, req, _res) {
         var lines = fs.readFileSync(filePath).toString().split(/(\r\n|\r|\n)/g);
+
         var linesResult = [];
         var poopScriptStarted = false;
         var poopScriptLines = [];
+
         var stopExec = false;
         var halt = false;
+        var res = _res;
+
+        var overrideStatus = -1;
 
         var env = new PoopScriptEnv(["__globalctx__->eval", "__globalctx__->alert"]);
 
@@ -53,8 +58,12 @@ class PoopScriptFileHandler {
         });
 
         env.GLOBAL_OBJECTS["web"] = {
-            "status": (words, specialData) => {
-                res = res.status(Number.parseInt(words[1]));
+            "status": async (words, specialData) => {
+                if(isNaN(parseInt(words[1])) || parseInt(words[1]) > 1000 || parseInt(words[1]) < 100) {
+                    throw "Status must be an integer from 100 to 1000.";
+                }
+
+                overrideStatus = parseInt(words[1]);
             },
             "sendAndFinish": (words) => {
                 res.send(words.splice(1).join(" "));
@@ -181,7 +190,7 @@ class PoopScriptFileHandler {
             }
         }
 
-        res.status(200).send(linesResult.join("\n"));
+        res.status((overrideStatus == -1 ? 200 : overrideStatus)).send(linesResult.join("\n"));
     }
 }
 
