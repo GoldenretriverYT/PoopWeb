@@ -16,3 +16,10 @@ console.log("\nDone! Initiliazing MySQLManager...");
 MySQLManager.init();
 console.log("\nDone! Starting WebServer...");
 WebServer.init();
+
+process.on("unhandledRejection", (err, prom) => {
+    console.log("UNHANDLED REJECTION - THIS ISNT MEANT TO HAPPEN - PLEASE REPORT");
+    console.log("Error:", err);
+    console.log("Stack:", err.stack);
+    console.log("Promise: ", prom);
+})

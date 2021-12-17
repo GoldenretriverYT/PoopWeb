@@ -50,7 +50,9 @@ class WebServer {
                 if(Config.config.extensionHandlers[ext] == "poopscript" || Config.config.extensionHandlers[ext] == "sendfile") {
                     if(modifiedUrl.endsWith(ext)) {
                         if(Config.config.extensionHandlers[ext] == "poopscript") {
-                            await PoopScriptFileHandler.handleFile(PathUtils.preparePath(Config.config.hostDirectory + modifiedUrl), req, res);
+                            await PoopScriptFileHandler.handleFile(PathUtils.preparePath(Config.config.hostDirectory + modifiedUrl), req, res).catch((err) => {
+                                res.status(500).send(GenericUtils.generateErrorPage("Internal server error", "An internal server error occurred."));
+                            });
                         }else if(Config.config.extensionHandlers[ext] == "sendfile") {
                             await DefaultFileHandler.handleFile(PathUtils.preparePath(Config.config.hostDirectory + modifiedUrl), req, res);
                         }

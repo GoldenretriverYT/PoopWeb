@@ -12,6 +12,7 @@
     "bcrypt": "^5.0.1",
     "cookie-parser": "^1.4.6",
     "express": "^4.17.1",
-    "mysql2": "^2.3.3"
+    "mysql2": "^2.3.3",
+    "trace-unhandled": "^2.0.1"
   }
 }

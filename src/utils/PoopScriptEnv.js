@@ -136,7 +136,7 @@ class PoopScriptEnv {
                     }
                 }
             },
-            "assign": (words) => {
+            "assign": async (words) => {
                 if(words[1] == undefined) { // well, we DO need a name.
                     throw(PSConst.errors.NO_VAR_PASSED);
                 }
@@ -149,7 +149,11 @@ class PoopScriptEnv {
                     throw(PSConst.getError("INV_ASSIGN", "="));
                 }
 
-                this.GLOBAL_VARS[words[1]] = this.exec(words[3]);
+                try {
+                    this.GLOBAL_VARS[words[1]] = await this.exec(words[3]);
+                }catch(err) {
+                    throw err;
+                }
             },
             "unset": (words) => {
                 if(words[1] == undefined) { // well, we DO need a name.
@@ -637,7 +641,11 @@ class PoopScriptEnv {
             if(_obj in this.GLOBAL_OBJECTS) {
                 if(_method in this.GLOBAL_OBJECTS[_obj]) {
                     try {
-                        latestReturn = await this.GLOBAL_OBJECTS[_obj][_method](words, {depth: depth});
+                        if(this.GLOBAL_OBJECTS[_obj][_method][Symbol.toStringTag] === "AsyncFunction") {
+                            latestReturn = await this.GLOBAL_OBJECTS[_obj][_method](words, {depth: depth}).catch((err) => { throw err; });
+                        }else {
+                            latestReturn = this.GLOBAL_OBJECTS[_obj][_method](words, {depth: depth});
+                        }
 
                         if(_method == "returnString" || _method == "returnNumber") {
                             if(iAmMain) this.#mainExecStarted = 0;

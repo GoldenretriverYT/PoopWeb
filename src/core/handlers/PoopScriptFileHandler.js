@@ -58,7 +58,7 @@ class PoopScriptFileHandler {
         });
 
         env.GLOBAL_OBJECTS["web"] = {
-            "status": async (words, specialData) => {
+            "status": (words, specialData) => {
                 if(isNaN(parseInt(words[1])) || parseInt(words[1]) > 1000 || parseInt(words[1]) < 100) {
                     throw "Status must be an integer from 100 to 1000.";
                 }
@@ -74,11 +74,11 @@ class PoopScriptFileHandler {
             "vardump": (words) => {
                 linesResult.push(JSON.stringify(env.GLOBAL_VARS));
             },
-            "getHeader": (words) => {
+            "getHeader": async (words) => {
                 if(words.length > 2) {
                     env.GLOBAL_VARS[words[2]] = req.get(words[1]);
                 }else {
-                    return req.get(words[1]);
+                    throw("web->getHeader expects two arguments: [header] [toStoreVariable]");
                 }
             }
         }
@@ -139,7 +139,7 @@ class PoopScriptFileHandler {
                 console.log(res);
                 env.GLOBAL_VARS[words[1]] = res;
 
-                await env.exec(env.CUSTOM_FUNCTIONS[words[2]].join(";\n"));
+                await env.exec(env.CUSTOM_FUNCTIONS[words[2]].join(";\n")).catch((err) => { throw "PSFH:142" + err; });
 
                 halt = false;
             }
@@ -154,7 +154,7 @@ class PoopScriptFileHandler {
             }else if(line.trim() == ";;stop ps" && poopScriptStarted) {
                 try {
                     poopScriptStarted = false;
-                    await env.exec(poopScriptLines.join("\n"));
+                    await env.exec(poopScriptLines.join("\n")).catch((err) => { throw err; });
                 } catch(err) {
                     if(Config.config.poopscriptSettings.errorHandling == "print_error") {
                         console.log("Oops! PoopScript crashed!");
