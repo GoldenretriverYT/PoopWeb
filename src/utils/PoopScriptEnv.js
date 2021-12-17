@@ -149,11 +149,7 @@ class PoopScriptEnv {
                     throw(PSConst.getError("INV_ASSIGN", "="));
                 }
 
-                try {
-                    this.GLOBAL_VARS[words[1]] = await this.exec(words[3]);
-                }catch(err) {
-                    throw err;
-                }
+                this.GLOBAL_VARS[words[1]] = await this.exec(words[3]).catch((err) => { throw err; });
             },
             "unset": (words) => {
                 if(words[1] == undefined) { // well, we DO need a name.
