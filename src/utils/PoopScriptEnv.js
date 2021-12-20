@@ -172,6 +172,9 @@ class PoopScriptEnv {
             },
             "reset": (words) => {
                 this.GLOBAL_VARS = {};
+            },
+            "getFromIndex": (words) => {
+                return words[1][words[2]];
             }
         },
         array: {
@@ -241,6 +244,43 @@ class PoopScriptEnv {
             "joinWords": (words) => {
                 if(words.length < 3 && this.#strict) throw("STRICT: Insufficient arguments passed to string->joinWords!");
                 return words.splice(2).join(words[1]);
+            },
+            "concat": (words) => {
+                if(words.length > 3) {
+                    return [words[1], words[2]].join([3]);
+                } else {
+                    return words[1].toString() + words[2].toString();
+                }
+            },
+            "substr": (words) => {
+                return words[1].substr(words[2], words[3]);
+            },
+            "substring": (words) => {
+                return words[1].substring(words[2], words[3]);
+            },
+            "startsWith": (words) => {
+                return (words[1].startsWith(words[2]) ? "yes" : "no");
+            },
+            "endsWith": (words) => {
+                return (words[1].endsWith(words[2]) ? "yes" : "no");
+            },
+            "trim": (words) => {
+                return words[1].trim();
+            },
+            "replace": (words) => {
+                return words[1].replace(words[2], words[3]);
+            },
+            "replaceRegex": (words) => {
+                return words[1].replace(new RegExp(words[2], words[3]), words[4]);
+            },
+            "charAt": (words) => {
+                return words[1].charAt(words[2]);
+            },
+            "charCodeAt": (words) => {
+                return words[1].charCodeAt(words[2]);
+            },
+            "sanitizeHTML": (words) => {
+                return words[1].replace(/<\/?[^>]+(>|$)/g, "");
             }
         },
         json: {
