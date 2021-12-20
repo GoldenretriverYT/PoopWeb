@@ -168,14 +168,6 @@ class PoopScriptFileHandler {
             }
         }
 
-        for(var queryKey of Object.keys(req.query)) {
-            env.GLOBAL_VARS["query_" + queryKey] = req.query[queryKey];
-        }
-
-        for(var bodyKey of Object.keys(req.body)) {
-            env.GLOBAL_VARS["body_" + bodyKey] = req.body[bodyKey];
-        }
-
         /** @type {MySQLClient} */
         var mysqlSelected = null;
 
@@ -199,6 +191,14 @@ class PoopScriptFileHandler {
 
                 halt = false;
             }
+        }
+
+        for(var queryKey of Object.keys(req.query)) {
+            env.GLOBAL_VARS["query_" + queryKey] = req.query[queryKey];
+        }
+
+        for(var bodyKey of Object.keys(req.body)) {
+            env.GLOBAL_VARS["body_" + bodyKey] = req.body[bodyKey];
         }
 
         for(var line of lines) {
