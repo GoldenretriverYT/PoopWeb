@@ -57,6 +57,17 @@
             <li><code>fs->mkdir [recursive (yes/no)] [path (string)]</code>: Creates the path, recursively if set to "yes"</li>
         </ul>
         <br>
+        <code style="font-size: 16px; font-weight: 800;" id="refweb">web</code><br>
+        web is a utility library for request/response related stuff.
+        <ul>
+            <li><code>web->status [status code (number 100-999)]</code>: Sets the HTTP status code</li>
+            <li><code>web->sendAndFinish [content (string)]</code>: Stops the request and sends the content (might be broken)</li>
+            <li><code>web->vardump</code>: Dumps all variables as JSON to page</li>
+            <li><code>web->getHeader [header name (word)] [to store variable (word)]</code>: Stores the header content inside the given variable</li>
+            <li><code>web->setHeader [header name (word)] [value (string/number/etc)]</code>: Sets a response header to the given value</li>
+            <li><code>web->redirect [path (string)]</code>: Redirects to the given path</li>
+        </ul>
+        <br>
         <code style="font-size: 16px; font-weight: 800;" id="refmysql">mysql</code><br>
         mysql is a library that adds (My)SQL functionality.
         <ul>
