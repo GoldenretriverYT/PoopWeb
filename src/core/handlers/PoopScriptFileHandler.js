@@ -138,6 +138,9 @@ class PoopScriptFileHandler {
             },
             "syslog": (words) => {
                 console.log(words);
+            },
+            "shutdown": (words) => {
+                process.exitCode = 1;
             }
         }
 

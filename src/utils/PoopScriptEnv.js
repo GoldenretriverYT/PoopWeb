@@ -315,6 +315,54 @@
             },
             "length": (words) => {
                 return words[1].length;
+            },
+            "includes": (words) => {
+                return (words[1].includes(words[2]) ? "yes" : "no");
+            },
+            "repeat": (words) => {
+                return words[1].repeat(parseFloat(words[2]));
+            }
+        },
+        time: {
+            "nowMs": (words) => {
+                return Date.now();
+            },
+            "atMs": (words) => {
+                return Date.parse(words[1]);
+            },
+            "seconds": (words) => {
+                return new Date(parseFloat(words[1])).getSeconds();
+            },
+            "minutes": (words) => {
+                return new Date(parseFloat(words[1])).getMinutes();
+            },
+            "hours": (words) => {
+                return new Date(parseFloat(words[1])).getHours();
+            },
+            "date": (words) => {
+                return new Date(parseFloat(words[1])).getDate();
+            },
+            "month": (words) => {
+                return new Date(parseFloat(words[1])).getMonth()+1;
+            },
+            "year": (words) => {
+                return new Date(parseFloat(words[1])).getFullYear();
+            }
+        },
+        base64: {
+            "encode": (words) => {
+                if(PSConst.isNode) {
+                    return Buffer.from(words[1]).toString("base64");
+                }else {
+                    return atob(words[1]);
+                }
+            },
+            "decode": (words) => {
+                if(PSConst.isNode) {
+                    return Buffer.from(words[1], "base64").toString();
+                }else {
+                    btoa(words[1]);
+                }
             }
         },
         json: {
