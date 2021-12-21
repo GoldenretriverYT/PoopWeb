@@ -27,6 +27,7 @@ class PoopScriptFileHandler {
         var poopScriptLines = [];
 
         var stopExec = false;
+        var doNotSend = false;
         var halt = false;
         var maxHaltMs = 5000;
 
@@ -82,12 +83,14 @@ class PoopScriptFileHandler {
                     Logger.error(req.path + ": " + args.join(" "));
 
                     stopExec = true;
+                    env.stopCode = true;
                     return;
                 } else {
                     res.status(500).send(GenericUtils.generateErrorPage("Internal server error", "The PoopScript execution did error out."));
                     Logger.error(req.path + ": " + args.join(" "));
                     
                     stopExec = true;
+                    env.stopCode = true;
                     return;
                 }
             }
@@ -102,9 +105,10 @@ class PoopScriptFileHandler {
                 overrideStatus = parseInt(words[1]);
             },
             "sendAndFinish": (words) => {
-                res.send(words.splice(1).join(" "));
+                res.send(words[1]);
                 
                 stopExec = true;
+                env.stopCode = true;
                 return;
             },
             "vardump": (words) => {
@@ -128,7 +132,12 @@ class PoopScriptFileHandler {
                 res.redirect(words[1]);
 
                 stopExec = true;
+                doNotSend = true;
+                env.stopCode = true;
                 return;
+            },
+            "syslog": (words) => {
+                console.log(words);
             }
         }
 
@@ -168,6 +177,18 @@ class PoopScriptFileHandler {
             }
         }
 
+<<<<<<< Updated upstream
+=======
+        for(var queryKey of Object.keys(req.query)) {
+            env.GLOBAL_VARS["query_" + queryKey] = req.query[queryKey];
+        }
+
+        console.log(req.body);
+        for(var bodyKey of Object.keys(req.body)) {
+            env.GLOBAL_VARS["body_" + bodyKey] = req.body[bodyKey];
+        }
+
+>>>>>>> Stashed changes
         /** @type {MySQLClient} */
         var mysqlSelected = null;
 
@@ -222,6 +243,7 @@ class PoopScriptFileHandler {
                         Logger.error("Message: " + err.message + " | StackTrace: " + err.stack);
                         
                         stopExec = true;
+                        env.stopCode = true;
                         return;
                     } else {
                         console.log("Oops! PoopScript crashed!");
@@ -232,6 +254,7 @@ class PoopScriptFileHandler {
                         Logger.error("Message: " + err.message + " | StackTrace: " + err.stack);
                         
                         stopExec = true;
+                        env.stopCode = true;
                         return;
                     }
                 }
@@ -254,7 +277,7 @@ class PoopScriptFileHandler {
             }
         }
 
-        res.status((overrideStatus == -1 ? 200 : overrideStatus)).send(linesResult.join("\n"));
+        if(!doNotSend) res.status((overrideStatus == -1 ? 200 : overrideStatus)).send(linesResult.join("\n"));
     }
 }
 

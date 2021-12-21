@@ -1,4 +1,10 @@
-class PoopScriptEnv {
+/**
+ * Todos:
+ *   string->length, global->doesExist, string->split
+ *   simplified ifs? maybe?
+ */
+
+ class PoopScriptEnv {
     GLOBAL_VARS = {};
     #console = null;
     #strict = false;
@@ -6,6 +12,8 @@ class PoopScriptEnv {
     #intervals = {};
     #intervalIndex = 0;
     #mainExecStarted = 0;
+
+    stopCode = false;
 
     GLOBAL_OBJECTS = {
         __globalctx__: {
@@ -148,7 +156,6 @@ class PoopScriptEnv {
                 if(!(words[2] == "=")) { // This is to prevent accidentally not adding a name for the variable and then wondering why its never correctly replaced
                     throw(PSConst.getError("INV_ASSIGN", "="));
                 }
-
                 this.GLOBAL_VARS[words[1]] = await this.exec(words[3]).catch((err) => { throw err; });
             },
             "unset": (words) => {
@@ -238,6 +245,30 @@ class PoopScriptEnv {
                 }
 
                 this.GLOBAL_VARS[words[1]][parseInt(words[2])] = words[3]; 
+            },
+            "iter": async (words, specialData) => {
+                if(words[1] == undefined) { // well, we DO need a name.
+                    throw("No variable name passed to array->iter");
+                }
+
+                if((words[1].match(/([^A-Za-z0-9])+/g) || []).length > 0 || (words[2].match(/([^A-Za-z0-9])+/g) || []).length > 0 || (words[3].match(/([^A-Za-z0-9])+/g) || []).length > 0) { // find all matches of non-alpha chars or return empty array instead of NULL
+                    throw(PSConst.errors.INV_VAR_NAME);
+                }
+
+                if(!(words[1] in this.GLOBAL_VARS)) {
+                    throw("There is no variable named like " + words[1] + ".");
+                }
+
+                if(!(this.GLOBAL_VARS[words[1]] instanceof Array)) {
+                    throw("That variable is not an array.");
+                }
+
+                for(var i = 0; i < this.GLOBAL_VARS[words[1]].length; i++) {
+                    this.GLOBAL_VARS[words[2]] = this.GLOBAL_VARS[words[1]][i];
+                    this.GLOBAL_VARS[words[3]] = i;
+
+                    await this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
+                }
             }
         },
         string: {
@@ -245,6 +276,7 @@ class PoopScriptEnv {
                 if(words.length < 3 && this.#strict) throw("STRICT: Insufficient arguments passed to string->joinWords!");
                 return words.splice(2).join(words[1]);
             },
+<<<<<<< Updated upstream
             "concat": (words) => {
                 if(words.length > 3) {
                     return [words[1], words[2]].join([3]);
@@ -281,6 +313,13 @@ class PoopScriptEnv {
             },
             "sanitizeHTML": (words) => {
                 return words[1].replace(/<\/?[^>]+(>|$)/g, "");
+=======
+            "sanitizeHTML": (words) => {
+                return words[1].replace(/<\/?[^>]+(>|$)/g, "");
+            },
+            "length": (words) => {
+                return words[1].length;
+>>>>>>> Stashed changes
             }
         },
         json: {
@@ -356,7 +395,7 @@ class PoopScriptEnv {
 
                 return true;
             },
-            "runIf": (words, specialData) => {
+            "runIf": async (words, specialData) => {
                 var left = words[1];
                 var compType = words[2];
                 var right = words[3];
@@ -367,27 +406,27 @@ class PoopScriptEnv {
 
                 if(compType == "==") {
                     if(left == right) {
-                        this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
+                        await this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
                     }
                 }else if(compType == ">") {
                     if(parseFloat(left) > parseFloat(right)) {
-                        this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
+                        await this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
                     }
                 }else if(compType == "<") {
                     if(parseFloat(left) < parseFloat(right)) {
-                        this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
+                        await this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
                     }
                 }else if(compType == ">=") {
                     if(parseFloat(left) >= parseFloat(right)) {
-                        this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
+                        await this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
                     }
                 }else if(compType == "<=") {
                     if(parseFloat(left) <= parseFloat(right)) {
-                        this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
+                        await this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
                     }
                 }
             },
-            "runIfElse": (words, specialData) => {
+            "runIfElse": async (words, specialData) => {
                 var left = words[1];
                 var compType = words[2];
                 var right = words[3];
@@ -398,33 +437,33 @@ class PoopScriptEnv {
 
                 if(compType == "==") {
                     if(left == right) {
-                        this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
+                        await this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
                     }else {
-                        this.exec(this.CUSTOM_FUNCTIONS[words[5]].join(";\n"), specialData.depth+1);
+                        await this.exec(this.CUSTOM_FUNCTIONS[words[5]].join(";\n"), specialData.depth+1);
                     }
                 }else if(compType == ">") {
                     if(parseFloat(left) > parseFloat(right)) {
-                        this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
+                        await this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
                     }else {
-                        this.exec(this.CUSTOM_FUNCTIONS[words[5]].join(";\n"), specialData.depth+1);
+                        await this.exec(this.CUSTOM_FUNCTIONS[words[5]].join(";\n"), specialData.depth+1);
                     }
                 }else if(compType == "<") {
                     if(parseFloat(left) < parseFloat(right)) {
-                        this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
+                        await this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
                     }else {
-                        this.exec(this.CUSTOM_FUNCTIONS[words[5]].join(";\n"), specialData.depth+1);
+                        await this.exec(this.CUSTOM_FUNCTIONS[words[5]].join(";\n"), specialData.depth+1);
                     }
                 }else if(compType == ">=") {
                     if(parseFloat(left) >= parseFloat(right)) {
-                        this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
+                        await this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
                     }else {
-                        this.exec(this.CUSTOM_FUNCTIONS[words[5]].join(";\n"), specialData.depth+1);
+                        await this.exec(this.CUSTOM_FUNCTIONS[words[5]].join(";\n"), specialData.depth+1);
                     }
                 }else if(compType == "<=") {
                     if(parseFloat(left) <= parseFloat(right)) {
-                        this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
+                        await this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
                     }else {
-                        this.exec(this.CUSTOM_FUNCTIONS[words[5]].join(";\n"), specialData.depth+1);
+                        await this.exec(this.CUSTOM_FUNCTIONS[words[5]].join(";\n"), specialData.depth+1);
                     }
                 }
             },
@@ -517,6 +556,10 @@ class PoopScriptEnv {
         var currentlyCommenting = false;
 
         for(var line of lines) {
+            if(this.stopCode) {
+                return;
+            }
+
             if(Date.now()-this.#mainExecStarted > this.#timeoutTime) {
                 if(iAmMain) {
                     this.#console.error("Script execution timed out after " + (Date.now()-this.#mainExecStarted) + "ms, you might have recursion in your code.");
@@ -632,7 +675,7 @@ class PoopScriptEnv {
             });
 
             for(var i = 0; i < words.length; i++) {
-                Object.keys(this.GLOBAL_VARS).forEach((key, idx) => {
+                Object.keys(this.GLOBAL_VARS).sort(function(a, b){return b.length - a.length;}).forEach((key, idx) => {
                     words[i] = words[i].toString().replace(replacementVars[key].regexp, replacementVars[key].val);
                 });
 
@@ -672,7 +715,6 @@ class PoopScriptEnv {
 
             if(_obj == "") _obj = "__globalctx__";
             if(line.trim() == "") continue;
-
 
             if(_obj in this.GLOBAL_OBJECTS) {
                 if(_method in this.GLOBAL_OBJECTS[_obj]) {
