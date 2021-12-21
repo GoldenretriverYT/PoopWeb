@@ -177,18 +177,6 @@ class PoopScriptFileHandler {
             }
         }
 
-<<<<<<< Updated upstream
-=======
-        for(var queryKey of Object.keys(req.query)) {
-            env.GLOBAL_VARS["query_" + queryKey] = req.query[queryKey];
-        }
-
-        console.log(req.body);
-        for(var bodyKey of Object.keys(req.body)) {
-            env.GLOBAL_VARS["body_" + bodyKey] = req.body[bodyKey];
-        }
-
->>>>>>> Stashed changes
         /** @type {MySQLClient} */
         var mysqlSelected = null;
 

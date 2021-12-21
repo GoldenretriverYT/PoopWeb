@@ -276,7 +276,6 @@
                 if(words.length < 3 && this.#strict) throw("STRICT: Insufficient arguments passed to string->joinWords!");
                 return words.splice(2).join(words[1]);
             },
-<<<<<<< Updated upstream
             "concat": (words) => {
                 if(words.length > 3) {
                     return [words[1], words[2]].join([3]);
@@ -313,13 +312,9 @@
             },
             "sanitizeHTML": (words) => {
                 return words[1].replace(/<\/?[^>]+(>|$)/g, "");
-=======
-            "sanitizeHTML": (words) => {
-                return words[1].replace(/<\/?[^>]+(>|$)/g, "");
             },
             "length": (words) => {
                 return words[1].length;
->>>>>>> Stashed changes
             }
         },
         json: {
