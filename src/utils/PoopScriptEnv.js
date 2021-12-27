@@ -69,6 +69,9 @@
             "mul": (words) => {
                 return parseFloat(words[1]) * parseFloat(words[2]);
             },
+            "rem": (words) => {
+                return parseFloat(words[1]) % parseFloat(words[2]);
+            },
             "pow": (words) => {
                 console.log(words);
                 return parseFloat(words[1]) ** parseFloat(words[2]);
@@ -791,11 +794,11 @@
     }
 
     quickMathEval(query) {
-        if(!(query.split(/([\+\-\/\*])/g).length == 3)) {
+        if(!(query.split(/([\+\-\/\*\^\%])/g).length == 3)) {
             throw "QuickMath only supports two arguments, left and right. You can use variables to perform more advanced math.";
         }
 
-        var args = query.split(/([\+\-\/\*])/g);
+        var args = query.split(/([\+\-\/\*\^\%])/g);
 
         if(args[0].toString().startsWith("%%")) {
             args[0] = parseFloat(this.GLOBAL_VARS[args[0].split("%%")[1]]);
@@ -818,6 +821,12 @@
             res = args[0] / args[2];
         }else if(args[1] == "*") {
             res = args[0] * args[2];
+        }else if(args[1] == "^") {
+            res = args[0] ** args[2];
+        }else if(args[1] == "%") {
+            res = args[0] % args[2];
+        }else {
+            throw "Invalid operator in QuickMath";
         }
 
         return res.toString();
