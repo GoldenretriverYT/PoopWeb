@@ -6,6 +6,8 @@ const { PoopScriptEnv } = require("./../../utils/PoopScriptEnv");
 const { response, request, query } = require("express");
 const MySQLManager = require("../../mysql/MySQLManager");
 const MySQLClient = require("../../mysql/MySQLClient");
+const fetch = require("node-fetch");
+const { Headers } = require("node-fetch");
 
 class PoopScriptFileHandler {
     /**
@@ -177,6 +179,49 @@ class PoopScriptFileHandler {
                 } else {
                     throw "mkdir expects 2 arguments, first one needs to be yes/no (argument: recursive)";
                 }
+            }
+        }
+
+        env.GLOBAL_OBJECTS["http"] = {
+            "get": async (words) => {
+                var headers = new Headers();
+                
+                if(!(words[1] in env.GLOBAL_VARS && typeof(env.GLOBAL_VARS[1]) == "object")) {
+                    throw "First argument is either not defined or not a JSON-object";
+                }
+
+                for(var key of Object.keys(env.GLOBAL_VARS[words[1]])) {
+                    headers.set(key, env.GLOBAL_VARS[words[1]][key]);
+                }
+
+                var res = await fetch(words[2], {
+                    headers: headers
+                });
+
+                return await res.text();
+            },
+            "post": async (words) => {
+                var headers = new Headers();
+                
+                if(!(words[1] in env.GLOBAL_VARS && typeof(env.GLOBAL_VARS[1]) == "object")) {
+                    throw "First argument is either not defined or not a JSON-object";
+                }
+
+                if(!(words[1] in env.GLOBAL_VARS)) {
+                    throw "Second argument is not defined";
+                }
+
+                for(var key of Object.keys(env.GLOBAL_VARS[words[1]])) {
+                    headers.set(key, env.GLOBAL_VARS[words[1]][key]);
+                }
+
+                var res = await fetch(words[3], {
+                    headers: headers,
+                    method: "POST",
+                    body: env.GLOBAL_VARS[words[2]]
+                });
+
+                return await res.text();
             }
         }
 
