@@ -249,7 +249,7 @@ class PoopScriptFileHandler {
                 halt = false;
             }
         }
-
+        
         for(var queryKey of Object.keys(req.query)) {
             env.GLOBAL_VARS["query_" + queryKey] = req.query[queryKey];
         }
