@@ -1,0 +1,47 @@
+<head>
+    <link rel="stylesheet" href="../../style/style.css"/>
+    <title>PoopScriptDocs - Main</title>
+</head>
+<body>
+    <script>
+        window.onload = () => {
+            var els = document.getElementsByClassName("navElem");
+
+            for(el of els) {
+                addNavClick(el, el.getAttribute("data-goto"));
+            }
+        }
+
+        function addNavClick(el, to) {
+            el.addEventListener("click", (ev) => {
+                window.history.pushState({}, to, '#' + to);
+
+                document.getElementById(to).scrollIntoView({
+                    "behavior": "smooth"
+                });
+            });
+        }
+    </script>
+
+    <div class="nav" style="position: fixed; top: 0; left: 0;">
+        <div class="navElem" data-goto="dl">Download PoopWeb</div>
+        <div class="navElem" data-goto="wn">The directory structure</div>
+        <div class="navElem" data-goto="conf">Configuration</div>
+    </div>
+    <div class="content" style="margin-left: 16vw;">
+        <h1 id="dl">Downloading & installing PoopWeb</h1>
+        To download PoopWeb, go to <a href="https://github.com/GoldenretriverYT/PoopWeb">the repository</a> and download the <a href="https://github.com/GoldenretriverYT/PoopWeb/releases/latest">latest release</a>.
+        <br>
+        You will get a zip file including the binaries for PoopWeb. Extract the zip file and run the extracted .exe file inside the folder.<br><br>
+        <div class="warning" style="padding-top: 10px; padding-bottom: 10px; font-size: 16px; font-weight: 800; padding-left: 10px;">You have to extract the files for PoopWeb to work properly - do not run them inside the zip.</div>
+
+        <h2 id="wn">The directory structure</h2>
+        PoopWeb now has generated 3 new folders: <code>conf</code>, <code>log</code> and <code>www</code>. Each of these folder has a purpose.
+        <br>The <code>conf</code> folder contains configuration files.
+        <br>The <code>log</code> folder contains the log files, which show which sites were visited, etc.
+        <br>The <code>www</code> folder is your folder to put in any files which will be available on your site.
+
+        <h2 id="conf">Configuration</h2>
+        You can change quite a few settings to adjust PoopWeb to your likings. To edit the configuration, open <code>conf/config.json</code> in your preferred editor. In this file you can change stuff like the HTTP-Port, the MySQL connection credentials, etc.
+    </div>
+</body>
